@@ -5,7 +5,8 @@
   {mod, {year_progress_bot_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    cowboy
    ]},
   {env,[]},
   {modules, []},
