@@ -1,0 +1,39 @@
+[
+  {year_progress_bot, [
+    {tel_token, "${TEL_TOKEN}"},
+    {tel_host, "${TEL_HOST}"},
+    {tel_integrate, ${TEL_INTEGRATE}},
+    {host, "${HOST}"},
+    {port, ${PORT}},
+    {webhook_path, "${WEBHOOK_PATH}"},
+    {notifyer_loop_period, ${NOTIFIER_LOOP_PERIOD}}
+  ]},
+  {sumo_db, [
+    {wpool_opts, [{overrun_warning, 100}]},
+    {log_queries, true},
+    {query_timeout, 30000},
+    {storage_backends, [
+      {our_backend_pgsql, sumo_backend_pgsql, [
+        {host, "${PGSQL_HOST}"},
+        {port, ${PGSQL_PORT}},
+        {database, "${PGSQL_DATABASE}"},
+        {username, "${PGSQL_USERNAME}"},
+        {password, "${PGSQL_PASSWORD}"}
+      ]}
+    ]},
+    {stores, [
+      {pgsql_store, sumo_store_pgsql, [
+        {storage_backend, our_backend_pgsql},
+        {workers, 10}
+      ]}
+    ]},
+    {docs, [
+      {chats, pgsql_store, #{module => chats}}
+    ]},
+    {events, []}
+  ]},
+  {lager, [
+    {handlers, [{lager_console_backend, [{level,info}]}]},
+    {error_logger_redirect, false}
+  ]}
+].

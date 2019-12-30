@@ -1,0 +1,26 @@
+.rebar3
+_*
+.eunit
+*.o
+*.beam
+*.plt
+*.swp
+*.swo
+.erlang.cookie
+ebin
+log
+erl_crash.dump
+.rebar
+logs
+_build
+.idea
+*.iml
+rebar3.crashdump
+*~
+deps
+rel
+.concrete/DEV_MODE
+
+# Environment variables with secrets for mix to use with asdf-direnv
+.env
+.env-prod
