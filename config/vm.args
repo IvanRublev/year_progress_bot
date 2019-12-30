@@ -4,3 +4,8 @@
 
 +K true
 +A30
+
+# Disable busy waiting to discard CPU preheating for lower costs in cloud environment
++sbwt none
++sbwtdcpu none
++sbwtdio none
