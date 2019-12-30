@@ -1,0 +1,7 @@
+install:
+  - rebar3 get-deps
+script:
+  - git remote add heroku https://user:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git
+  - rebar3 as prod do compile,eunit,ct && git push -f heroku HEAD:refs/heads/master
+language: erlang
+otp_release: 22.2.1
