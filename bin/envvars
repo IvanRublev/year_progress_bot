@@ -1,0 +1,1 @@
+export REBAR_PROFILE=prod
