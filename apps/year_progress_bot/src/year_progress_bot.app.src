@@ -1,0 +1,20 @@
+{application, year_progress_bot,
+ [{description, "A Telegram bot that shows a progress bar for the current year."},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {year_progress_bot_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    cowboy,
+    sumo_db,
+    sumo_db_pgsql,
+    shotgun,
+    jiffy
+   ]},
+  {env, []},
+  {modules, [notifyer]},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
