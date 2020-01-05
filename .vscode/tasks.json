@@ -12,5 +12,14 @@
             ],
             "group": "build"
         },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "rebar3 eunit",
+            "problemMatcher": [
+                "$erlang"
+            ],
+            "group": "test"
+        },
     ]
 }

@@ -9,7 +9,7 @@
     cowboy
    ]},
   {env,[]},
-  {modules, []},
+  {modules, [notifyer]},
 
   {licenses, ["Apache 2.0"]},
   {links, []}
