@@ -14,6 +14,7 @@ send_progress({BatchSize, BatchTime} = BatchSpec) ->
         [] -> ok;
         List -> 
             [send_message(Id, Pause) || Id <- List],
+            db:mark_chats_notified(List, date:now()),
             send_progress(BatchSpec)
     end.
 
