@@ -10,7 +10,7 @@ evaluate_send_progress(BatchSpec) ->
 
 send_progress({BatchSize, BatchTime} = BatchSpec) ->
     Pause = BatchTime / BatchSize,
-    case db:unnotified_chats(BatchSize) of
+    case db:unnotified_chats(BatchSize, date:now()) of
         [] -> ok;
         List -> 
             SuccIds = filter_success([{send_message(Id, Pause), Id} || Id <- List]),

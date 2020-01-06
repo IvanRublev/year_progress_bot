@@ -7,7 +7,7 @@ progress_send_time_test_() ->
      fun() -> 
         meck:new(telegram, [{stub_all, ok}]),
         meck:new(db),
-        meck:expect(db, unnotified_chats, [1], meck:seq([[1], []])),
+        meck:expect(db, unnotified_chats, [1, '_'], meck:seq([[1], []])),
         meck:expect(db, mark_chats_notified, fun(_, _) -> ok end)
      end,
      fun(_) -> 
@@ -19,14 +19,14 @@ progress_send_time_test_() ->
       fun should_Not_send_progress_to_subscribed_chats_before_11_30_CET/1]}.
 
 should_send_progress_to_subscribed_chats_after_11_30_CET(_) ->
-        meck:new(date, [{stub_all, {11, 30}}]),
+        meck:expect(date, time, fun(_) -> {11, 30} end),
 
         notifyer:evaluate_send_progress({1, 1}),
 
         ?_assert(meck:called(telegram, send_message, '_')).
 
 should_Not_send_progress_to_subscribed_chats_before_11_30_CET(_) ->
-        meck:new(date, [{stub_all, {11, 29}}]),
+        meck:expect(date, time, fun(_) -> {11, 29} end),
 
         notifyer:evaluate_send_progress({1, 1}),
 
@@ -45,7 +45,7 @@ send_in_batches_test_() ->
             {{2020, 01, 02}, {11, 32, 1}}
         ])),
         meck:new(db),
-        meck:expect(db, unnotified_chats, [25], meck:seq([[X || X <- lists:seq(1,25)], [26, 27], []])),
+        meck:expect(db, unnotified_chats, [25, '_'], meck:seq([[X || X <- lists:seq(1,25)], [26, 27], []])),
         meck:expect(db, mark_chats_notified, fun(_, _) -> ok end),
         meck:new(util),
         meck:expect(util, pause, fun(_) -> ok end)
@@ -68,9 +68,11 @@ should_send_progress_in_batches_of_25_per_1000ms(_) ->
     ?_assert(meck:called(telegram, send_message, '_')).
 
 should_request_db_for_25_chat_ids(_) ->
+    meck:expect(date, now, [], {{2020, 01, 02}, {11, 30, 10}}),
+
     notifyer:evaluate_send_progress({25, 1000}),
 
-    ?_assertEqual(3, meck:num_calls(db, unnotified_chats, [25])).
+    ?_assertEqual(3, meck:num_calls(db, unnotified_chats, [25, {{2020, 01, 02}, {11, 30, 10}}])).
 
 should_pause_after_each_message_for_40ms(_) ->
     notifyer:evaluate_send_progress({25, 1000}),
