@@ -2,7 +2,7 @@
 -export([time/0, now/0]).
 
 time() -> 
-    {_, {H, M, _}} = date:now(),
+    {_, {H, M, _}} = ?MODULE:now(),
     {H, M}.
 
 now() ->
