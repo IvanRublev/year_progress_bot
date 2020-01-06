@@ -1,4 +1,4 @@
--module(local_time).
+-module(date).
 -export([time/1]).
 
 time(_) ->

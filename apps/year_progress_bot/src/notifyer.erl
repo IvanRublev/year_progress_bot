@@ -2,7 +2,7 @@
 -export([evaluate_send_progress/1]).
 
 evaluate_send_progress(BatchSpec) ->
-    {H, M} = local_time:time("CET"),
+    {H, M} = date:time("CET"),
     if 
         (H >= 11) and (M >= 30) -> send_progress(BatchSpec);
         true -> ok
