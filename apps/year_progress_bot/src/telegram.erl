@@ -1,5 +1,5 @@
 -module(telegram).
--export([send_message/0]).
+-export([send_message/1]).
 
-send_message() ->
+send_message(_) ->
     ok.

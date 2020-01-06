@@ -1,9 +1,18 @@
 -module(notifyer).
--export([evaluate_send_progress/0]).
+-export([evaluate_send_progress/1]).
 
-evaluate_send_progress() ->
+evaluate_send_progress(BatchSpec) ->
     {H, M} = local_time:time("CET"),
     if 
-        (H >= 11) and (M >= 30) -> telegram:send_message();
+        (H >= 11) and (M >= 30) -> send_progress();
         true -> ok
     end.
+
+send_progress() ->
+    telegram:send_message(0).
+    % case db:unnotified_chats(25) of
+    %     [] -> ok;
+    %     List -> 
+    %         [telegram:send_message(Id) || Id <- List],
+    %         send_progress()
+    % end.
