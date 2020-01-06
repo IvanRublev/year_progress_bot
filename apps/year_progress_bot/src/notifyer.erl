@@ -9,10 +9,9 @@ evaluate_send_progress(BatchSpec) ->
     end.
 
 send_progress() ->
-    telegram:send_message(0).
-    % case db:unnotified_chats(25) of
-    %     [] -> ok;
-    %     List -> 
-    %         [telegram:send_message(Id) || Id <- List],
-    %         send_progress()
-    % end.
+    case db:unnotified_chats(25) of
+        [] -> ok;
+        List -> 
+            [telegram:send_message(Id) || Id <- List],
+            send_progress()
+    end.

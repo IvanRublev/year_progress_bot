@@ -43,9 +43,15 @@ send_in_batches_test_() ->
         meck:unload(local_time),
         meck:unload(db)
     end,
-    [fun should_send_progress_in_batches_of_25_per_1000ms/1]}.
+    [fun should_send_progress_in_batches_of_25_per_1000ms/1,
+     fun should_request_db_for_25_chat_ids/1]}.
 
 should_send_progress_in_batches_of_25_per_1000ms(_) ->
     notifyer:evaluate_send_progress({25, 1000}),
 
     ?_assert(meck:called(telegram, send_message, '_')).
+
+should_request_db_for_25_chat_ids(_) ->
+    notifyer:evaluate_send_progress({25, 1000}),
+
+    ?_assertEqual(3, meck:num_calls(db, unnotified_chats, [25])).
