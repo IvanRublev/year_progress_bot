@@ -4,7 +4,8 @@
 create_schema() ->
     sumo:create_schema().
 
-unnotified_chats(_Count, _Date) ->
+unnotified_chats(Count, Date) ->
+    sumo:find_by(chats, [{notified_at, '<', Date}], Count, 0),
     [].
 
 mark_chats_notified(_List, _Date) ->
