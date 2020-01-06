@@ -13,11 +13,20 @@ send_progress({BatchSize, BatchTime} = BatchSpec) ->
     case db:unnotified_chats(BatchSize) of
         [] -> ok;
         List -> 
-            [send_message(Id, Pause) || Id <- List],
-            db:mark_chats_notified(List, date:now()),
+            SuccIds = filter_success([{send_message(Id, Pause), Id} || Id <- List]),
+            db:mark_chats_notified(SuccIds, date:now()),
             send_progress(BatchSpec)
     end.
 
 send_message(Id, Pause) ->
-    telegram:send_message(Id),
-    util:pause(Pause).
+    R = telegram:send_message(Id),
+    util:pause(Pause),
+    R.
+
+filter_success(SentList) ->
+    lists:filtermap(fun({Status, Id}) -> 
+        case Status of 
+            ok -> {true, Id};
+            _ -> false 
+        end 
+    end, SentList).
