@@ -5,6 +5,7 @@
 progress_send_time_test_() ->
     {foreach,
      fun() -> 
+        meck:new(formatter),
         meck:new(telegram, [{stub_all, ok}]),
         meck:new(db),
         meck:expect(db, unnotified_chats, [1, '_'], meck:seq([[1], []])),
@@ -12,25 +13,36 @@ progress_send_time_test_() ->
      end,
      fun(_) -> 
         meck:unload(date),
+        meck:unload(db),
         meck:unload(telegram),
-        meck:unload(db)
+        meck:unload(formatter)
      end,
      [fun should_send_progress_to_subscribed_chats_after_11_30_CET/1,
-      fun should_Not_send_progress_to_subscribed_chats_before_11_30_CET/1]}.
+      fun should_Not_send_progress_to_subscribed_chats_before_11_30_CET/1
+      ]}. %fun should_format_progress_to_be_sent/1
 
 should_send_progress_to_subscribed_chats_after_11_30_CET(_) ->
-        meck:expect(date, time, fun(_) -> {11, 30} end),
+    meck:expect(date, time, fun(_) -> {11, 30} end),
 
-        notifyer:evaluate_send_progress({1, 1}),
+    notifyer:evaluate_send_progress({1, 1}),
 
-        ?_assert(meck:called(telegram, send_message, '_')).
+    ?_assert(meck:called(telegram, send_message, '_')).
 
 should_Not_send_progress_to_subscribed_chats_before_11_30_CET(_) ->
-        meck:expect(date, time, fun(_) -> {11, 29} end),
+    meck:expect(date, time, fun(_) -> {11, 29} end),
 
-        notifyer:evaluate_send_progress({1, 1}),
+    notifyer:evaluate_send_progress({1, 1}),
 
-        ?_assertMatch(false, meck:called(telegram, send_message, '_')).
+    ?_assertMatch(false, meck:called(telegram, send_message, '_')).
+
+should_format_progress_to_be_sent(_) ->
+    meck:expect(date, time, fun(_) -> {11, 30} end),
+    meck:expect(formatter, year_progress_bar, fun(_) -> "1%" end),
+
+    notifyer:evaluate_send_progress({1, 1}),
+
+    [?_assert(meck:called(formatter, year_progress_bar, ['_'])),
+    ?_assert(meck:called(telegram, send_message, ["1%"]))].
 
 %-------------------------
 send_in_batches_test_() ->
@@ -41,6 +53,7 @@ send_in_batches_test_() ->
         meck:new(date),
         meck:expect(date, time, fun(_) -> {11, 30} end),
         meck:expect(date, now, [], meck:seq([
+            {{2020, 01, 02}, {11, 30, 25}},
             {{2020, 01, 02}, {11, 31, 19}},
             {{2020, 01, 02}, {11, 32, 1}}
         ])),
@@ -82,19 +95,19 @@ should_pause_after_each_message_for_40ms(_) ->
 should_mark_chat_ids_as_notified_in_db(_) ->
     notifyer:evaluate_send_progress({25, 1000}),
 
-    ?_assert(meck:called(db, mark_chats_notified, [lists:seq(1,25), {{2020, 01, 02}, {11, 31, 19}}])),
-    ?_assert(meck:called(db, mark_chats_notified, [[26, 27], {{2020, 01, 02}, {11, 32, 1}}])).
+    [?_assert(meck:called(db, mark_chats_notified, [lists:seq(1,25), {{2020, 01, 02}, {11, 31, 19}}])),
+     ?_assert(meck:called(db, mark_chats_notified, [[26, 27], {{2020, 01, 02}, {11, 32, 1}}]))].
 
 should_mark_chat_ids_as_notified_in_db_only_on_success_send(_) ->
     meck:expect(telegram, send_message, ['_'], meck:loop([ok, {error, {error_code, 500}}])),
 
     notifyer:evaluate_send_progress({25, 1000}),
 
-    ?_assert(meck:called(db, mark_chats_notified, [
-        lists:filter(fun(E) -> E rem 2 == 0 end, lists:seq(1,25)), 
+    [?_assert(meck:called(db, mark_chats_notified, [
+        lists:filter(fun(E) -> E rem 2 /= 0 end, lists:seq(1,25)), 
         {{2020, 01, 02}, {11, 31, 19}}
-    ])),
-    ?_assert(meck:called(db, mark_chats_notified, [
+     ])),
+     ?_assert(meck:called(db, mark_chats_notified, [
         [27],
         {{2020, 01, 02}, {11, 32, 1}}
-    ])).
+     ]))].
