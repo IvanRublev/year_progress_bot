@@ -1,8 +1,9 @@
 -module(date).
--export([time/1, now/0]).
+-export([time/0, now/0]).
 
-time(_) ->
-    {0, 0}.
+time() -> 
+    {_, {H, M, _}} = date:now(),
+    {H, M}.
 
 now() ->
-    {{0, 0, 0}, {0, 0, 0}}.
+    localtime:utc_to_local(calendar:universal_time(), "CET").

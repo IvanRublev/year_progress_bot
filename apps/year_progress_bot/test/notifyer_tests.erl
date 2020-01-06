@@ -19,14 +19,14 @@ progress_send_time_test_() ->
       fun should_Not_send_progress_to_subscribed_chats_before_11_30_CET/1]}.
 
 should_send_progress_to_subscribed_chats_after_11_30_CET(_) ->
-    meck:expect(date, time, fun(_) -> {11, 30} end),
+    meck:expect(date, time, fun() -> {11, 30} end),
 
     notifyer:evaluate_send_progress({1, 1}),
 
     ?_assert(meck:called(telegram, send_message, '_')).
 
 should_Not_send_progress_to_subscribed_chats_before_11_30_CET(_) ->
-    meck:expect(date, time, fun(_) -> {11, 29} end),
+    meck:expect(date, time, fun() -> {11, 29} end),
 
     notifyer:evaluate_send_progress({1, 1}),
 
@@ -39,7 +39,7 @@ send_in_batches_test_() ->
         meck:new(telegram),
         meck:expect(telegram, send_message, fun(_, _) -> ok end),
         meck:new(date),
-        meck:expect(date, time, fun(_) -> {11, 30} end),
+        meck:expect(date, time, fun() -> {11, 30} end),
         meck:expect(date, now, [], meck:seq([
             {{2020, 01, 02}, {11, 30, 25}},
             {{2020, 01, 02}, {11, 31, 19}},
