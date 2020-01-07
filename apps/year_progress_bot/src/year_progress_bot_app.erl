@@ -10,7 +10,7 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
-    db:create_schema(),
+    ok = db:create_schema(),
     year_progress_bot_sup:start_link().
 
 stop(_State) ->

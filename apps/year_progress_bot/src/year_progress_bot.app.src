@@ -6,9 +6,11 @@
   {applications,
    [kernel,
     stdlib,
-    cowboy
+    cowboy,
+    sumo_db,
+    sumo_db_pgsql
    ]},
-  {env,[]},
+  {env, []},
   {modules, [notifyer]},
 
   {licenses, ["Apache 2.0"]},

@@ -8,5 +8,11 @@ unnotified_chats(Count, Date) ->
     Chats = sumo:find_by(chats, [{notified_at, '<', Date}], Count, 0),
     lists:map(fun(Ch) -> maps:get(id, Ch) end, Chats).
 
-mark_chats_notified(_List, _Date) ->
-    ok.
+mark_chats_notified(List, Date) ->
+    [persist(Id, Date) || Id <- List].
+
+persist(Id, Date) ->
+    Chat = chats:new(Id, Date),
+    Changeset = sumo_changeset:cast(chats, Chat, #{}, [id, notified_at]),
+    Valid = sumo_changeset:validate_required(Changeset, [id, notified_at]),
+    {ok, _} = sumo:persist(Valid).
