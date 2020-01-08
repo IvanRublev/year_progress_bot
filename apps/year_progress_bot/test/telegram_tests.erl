@@ -44,3 +44,8 @@ should_POST_message_payload_to_telegram_server(_) ->
     [?_assert(meck:called(shotgun, open, ["HOST", 443, https])),
      ?_assert(meck:called(shotgun, post, ['_', "/botTOKEN/sendMessage", #{<<"content-type">> => <<"application/json">>}, <<"{json}">>])),
      ?_assert(meck:called(shotgun, close, [123]))].
+
+should_return_ok_on_status_2xx(_) ->
+    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 210}} end),
+
+    ?_assertMatch(ok, telegram:send_message(15, {{2020,10,11}, {11,50}})).
