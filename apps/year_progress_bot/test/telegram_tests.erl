@@ -8,9 +8,10 @@ send_test_() ->
          meck:expect(formatter, year_progress_bar, fun(_) -> "%" end),
          meck:new(jiffy),
          meck:expect(jiffy, encode, fun(_) -> <<"{json}">> end),
+         meck:expect(jiffy, decode, fun(_, _) -> #{<<"ok">> => true} end),
          meck:new(shotgun),
          meck:expect(shotgun, open, fun(_,_,_) -> {ok, 123} end),
-         meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 200}} end),
+         meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 200, body => <<"">>}} end),
          meck:expect(shotgun, close, fun(_) -> ok end),
          application:set_env([
             {year_progress_bot, [
@@ -28,7 +29,8 @@ send_test_() ->
      fun should_make_json_payload_for_progress_bar_message/1,
      fun should_POST_message_payload_to_telegram_server/1,
      fun should_return_ok_on_status_2xx/1,
-     fun should_return_error_on_status_5xx/1]}.
+     fun should_return_error_on_status_5xx/1,
+     fun sholud_return_error_from_backend_in_case_of_failure/1]}.
 
 should_get_progress_bar_from_date(_) ->
     telegram:send_message(0, {{2020,10,11}, {11,50}}),
@@ -48,12 +50,19 @@ should_POST_message_payload_to_telegram_server(_) ->
      ?_assert(meck:called(shotgun, close, [123]))].
 
 should_return_ok_on_status_2xx(_) ->
-    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 210}} end),
+    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 210, body => <<"">>}} end),
 
     ?_assertMatch(ok, telegram:send_message(15, {{2020,10,11}, {11,50}})).
 
 should_return_error_on_status_5xx(_) ->
-    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 504}} end),
+    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 504, body => <<"{some json}">>}} end),
 
-    ?_assertMatch({error, 504}, telegram:send_message(15, {{2020,10,11}, {11,50}})).
+    Exp = {error, 504, <<"{some json}">>},
+    ?_assertMatch(Exp, telegram:send_message(15, {{2020,10,11}, {11,50}})).
 
+sholud_return_error_from_backend_in_case_of_failure(_) ->
+    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 202, body => <<"{\"ok\": false}">>}} end),
+    meck:expect(jiffy, decode, fun(_, _) -> #{<<"ok">> => false} end),
+
+    Exp = {error, internal, <<"{\"ok\": false}">>},
+    ?_assertMatch(Exp, telegram:send_message(15, {{2020,10,11}, {11,50}})).

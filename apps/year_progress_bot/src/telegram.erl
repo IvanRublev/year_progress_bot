@@ -9,10 +9,18 @@ send_message(ChatId, ProgressDate) ->
     Headers = #{<<"content-type">> => <<"application/json">>},
     Msg = formatter:year_progress_bar(ProgressDate),
     Payload = jiffy:encode({[{chat_id, ChatId}, {text, Msg}]}),
+    
     {ok, Response} = shotgun:post(Conn, Path, Headers, Payload),
+    
     ok = shotgun:close(Conn),
-    #{status_code := Status} = Response,
+    
+    #{status_code := Status, body := Body} = Response,
     if 
-        (Status >= 200) and (Status =< 299) -> ok;
-        true -> {error, Status}
+        (Status >= 200) and (Status =< 299) -> 
+            RespDoc = jiffy:decode(Body, [return_maps]),
+            case maps:get(<<"ok">>, RespDoc) of
+                true -> ok;
+                false -> {error, internal, Body}
+            end;
+        true -> {error, Status, Body}
     end.

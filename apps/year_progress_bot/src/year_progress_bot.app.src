@@ -9,7 +9,8 @@
     cowboy,
     sumo_db,
     sumo_db_pgsql,
-    shotgun
+    shotgun,
+    jiffy
    ]},
   {env, []},
   {modules, [notifyer]},
