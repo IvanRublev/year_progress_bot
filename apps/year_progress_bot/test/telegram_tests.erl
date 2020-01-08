@@ -26,7 +26,9 @@ send_test_() ->
      end,
      [fun should_get_progress_bar_from_date/1,
      fun should_make_json_payload_for_progress_bar_message/1,
-     fun should_POST_message_payload_to_telegram_server/1]}.
+     fun should_POST_message_payload_to_telegram_server/1,
+     fun should_return_ok_on_status_2xx/1,
+     fun should_return_error_on_status_5xx/1]}.
 
 should_get_progress_bar_from_date(_) ->
     telegram:send_message(0, {{2020,10,11}, {11,50}}),
@@ -49,3 +51,9 @@ should_return_ok_on_status_2xx(_) ->
     meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 210}} end),
 
     ?_assertMatch(ok, telegram:send_message(15, {{2020,10,11}, {11,50}})).
+
+should_return_error_on_status_5xx(_) ->
+    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 504}} end),
+
+    ?_assertMatch({error, 504}, telegram:send_message(15, {{2020,10,11}, {11,50}})).
+

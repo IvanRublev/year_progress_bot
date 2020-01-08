@@ -9,6 +9,10 @@ send_message(ChatId, ProgressDate) ->
     Headers = #{<<"content-type">> => <<"application/json">>},
     Msg = formatter:year_progress_bar(ProgressDate),
     Payload = jiffy:encode({[{chat_id, ChatId}, {text, Msg}]}),
-    {ok, _Response} = shotgun:post(Conn, Path, Headers, Payload),
+    {ok, Response} = shotgun:post(Conn, Path, Headers, Payload),
     ok = shotgun:close(Conn),
-    ok.
+    #{status_code := Status} = Response,
+    if 
+        (Status >= 200) and (Status =< 299) -> ok;
+        true -> {error, Status}
+    end.
