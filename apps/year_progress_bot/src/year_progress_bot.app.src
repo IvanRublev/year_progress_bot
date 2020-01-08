@@ -8,7 +8,8 @@
     stdlib,
     cowboy,
     sumo_db,
-    sumo_db_pgsql
+    sumo_db_pgsql,
+    shotgun
    ]},
   {env, []},
   {modules, [notifyer]},
