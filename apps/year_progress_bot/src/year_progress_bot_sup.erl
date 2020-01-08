@@ -13,8 +13,13 @@
 
 -define(SERVER, ?MODULE).
 
+-ifdef(TEST).
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    ok.
+-else.
+start_link() ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, []).    
+-endif.
 
 %% sup_flags() = #{strategy => strategy(),         % optional
 %%                 intensity => non_neg_integer(), % optional

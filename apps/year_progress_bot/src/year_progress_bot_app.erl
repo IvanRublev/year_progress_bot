@@ -11,6 +11,7 @@
 
 start(_StartType, _StartArgs) ->
     ok = db:create_schema(),
+    io:format("tel_host ~w", [application:get_env(tel_host)]),
     year_progress_bot_sup:start_link().
 
 stop(_State) ->
