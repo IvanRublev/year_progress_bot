@@ -12,7 +12,8 @@ formatter_test_() ->
         meck:unload(date)
      end,
      [fun should_have_empty_bar_for_1_jan/1,
-     fun should_have_0_blocks_1_percent_bar_for_3_jan/1]}.
+      fun should_have_0_blocks_1_percent_bar_for_3_jan/1,
+      fun should_have_1_block_7percent_bar_for_24_jan/1]}.
 
 should_have_empty_bar_for_1_jan(_) ->
     P = formatter:year_progress_bar({{2020,1,1}, {20,30}}),
@@ -21,3 +22,7 @@ should_have_empty_bar_for_1_jan(_) ->
 should_have_0_blocks_1_percent_bar_for_3_jan(_) ->
     P = formatter:year_progress_bar({{2020,1,3}, {20,30}}),
     ?_assertEqual(binary_to_list(<<"░░░░░░░░░░░░░░░ 1%">>), string:left(P, 18)).
+
+should_have_1_block_7percent_bar_for_24_jan(_) ->
+    P = formatter:year_progress_bar({{2020,1,25}, {0,0}}),
+    ?_assertEqual(binary_to_list(<<"▓░░░░░░░░░░░░░░ 7%">>), string:left(P, 18)).

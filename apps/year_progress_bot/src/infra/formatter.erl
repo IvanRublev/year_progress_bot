@@ -10,7 +10,9 @@ year_progress_bar(Date) ->
     TotalDays = EndDays-StartDays,
     Percent = round(PassedDays/TotalDays*100),
     BarLen = 15,
-    io_lib:format("~*c ~B%", [BarLen, $░, Percent]).
+    FillBar = round(PassedDays*BarLen/TotalDays),
+    EmptyBar = BarLen-FillBar,
+    io_lib:format("~*c~*c ~B%", [FillBar, $▓, EmptyBar, $░, Percent]).
     % io:format(user, "pc ~p ~p ~p", [PassedDays, TotalDays, Percent]),
     % FillBar = round(PassedDays*BarLen/TotalDays),
     % EmptyBar = BarL
