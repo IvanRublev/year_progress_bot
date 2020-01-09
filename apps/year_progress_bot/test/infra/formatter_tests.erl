@@ -16,7 +16,8 @@ formatter_test_() ->
       fun should_have_1_block_6_percent_bar_for_25_jan/1,
       fun should_have_15_block_96_percent_bar_for_20_dec/1,
       fun should_have_15_block_99_percent_bar_for_31_dec/1,
-      fun should_have_two_bars_of_previous_and_current_year_for_1_jan_2021/1]}.
+      fun should_have_15_block_100_percent_bar_of_2020_for_1_jan_2021/1,
+      fun should_have_year_number_in_message/1]}.
 
 should_have_0_blocks_0_percent_bar_for_2_jan(_) ->
     P = formatter:year_progress_bar({{2020,1,2}, {0,0}}),
@@ -38,10 +39,14 @@ should_have_15_block_99_percent_bar_for_31_dec(_) ->
     P = formatter:year_progress_bar({{2020,12,31}, {23,59}}),
     ?_assertEqual(binary_to_list(<<"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 99%">>), string:left(P, 19)).
 
-should_have_two_bars_of_previous_and_current_year_for_1_jan_2021(_) ->
+should_have_15_block_100_percent_bar_of_2020_for_1_jan_2021(_) ->
     meck:expect(date, start_of_year_date, fun() -> {2021, 1, 1} end),
     meck:expect(date, end_of_year_date, fun() -> {2021, 12, 31} end),
 
     P = formatter:year_progress_bar({{2021,1,1}, {0,0}}),
-    [?_assertEqual(binary_to_list(<<"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%">>), string:left(P, 20)),
-     ?_assert(string:find(P, binary_to_list(<<"░░░░░░░░░░░░░░░ 0%">>)) /= nomatch)].
+    E = binary_to_list(<<"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%">>) ++ io_lib:format("~n", []) ++ binary_to_list(<<"2 0 2 0">>),
+    ?_assertEqual(E, P).
+
+should_have_year_number_in_message(_) ->
+    P = formatter:year_progress_bar({{2020,12,31}, {23,59}}),
+    ?_assertEqual(io_lib:format("~n", []) ++ binary_to_list(<<"2 0 2 0">>), string:right(P, 8)).

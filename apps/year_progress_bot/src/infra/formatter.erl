@@ -12,12 +12,13 @@ year_progress_bar(Date) ->
     BarLen = 15,
     FillBar = round(PassedDays*BarLen/TotalDays),
     EmptyBar = BarLen-FillBar,
-    Prefix = case DT of 
-        {_, 1, 1} -> bar(BarLen, 0, 100);
-        _ -> ""
-    end,
+    {Y, _, _} = DT,
+    case DT of 
+        {_, 1, 1} -> bar(BarLen, 0, 100, Y-1);
+        _ -> bar(FillBar, EmptyBar, Percent, Y)
+    end.
     % io:format(user, "pc ~p ~p ~p", [PassedDays, TotalDays, Percent]),
-    Prefix ++ bar(FillBar, EmptyBar, Percent).
 
-bar(FillBar, EmptyBar, Percent) ->
-    io_lib:format("~*c~*c ~B%", [FillBar, $▓, EmptyBar, $░, Percent]).
+bar(FillBar, EmptyBar, Percent, Year) ->
+    YearSp = lists:join(32, io_lib:format("~B", [Year])),
+    io_lib:format("~*c~*c ~B%~n", [FillBar, $▓, EmptyBar, $░, Percent]) ++ YearSp.
