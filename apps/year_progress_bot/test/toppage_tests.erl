@@ -1,4 +1,4 @@
--module(bot_tests).
+-module(toppage_tests).
 -include_lib("eunit/include/eunit.hrl").
 
 reply_test_() ->
