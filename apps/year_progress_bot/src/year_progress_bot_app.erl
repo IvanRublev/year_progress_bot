@@ -15,13 +15,15 @@ start(_StartType, _StartArgs) ->
     year_progress_bot_sup:start_link().
 
 launch_endpoint() ->
-    _Dispatch = cowboy_router:compile([
+    Dispatch = cowboy_router:compile([
 		{'_', [
 			{"/start", endpoint, [start]},
             {"/help", endpoint, [help]},
             {"/progress", endpoint, [progress]}
 		]}
-	]).
+	]),
+    {ok, Port} = application:get_env(year_progress_bot, port),
+    cowboy:start_clear(http, Port, #{env => #{dispatch => Dispatch}}).
 
 stop(_State) ->
     ok.
