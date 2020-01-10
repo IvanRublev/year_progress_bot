@@ -105,3 +105,34 @@ should_mark_chat_ids_as_notified_in_db_only_on_success_send(_) ->
         [27],
         {{2020, 01, 02}, {11, 32, 1}}
      ]))].
+
+%-------------------------
+send_failure_test_() ->
+    {foreach,
+    fun() ->
+        meck:new(telegram),
+        meck:expect(telegram, send_message, fun (_, _) -> {error, internal, "banned"} end),
+        meck:new(date),
+        meck:expect(date, time, fun() -> {11, 30} end),
+        meck:expect(date, now, [], meck:seq([
+            {{2020, 01, 02}, {11, 30, 25}}
+        ])),
+        meck:new(db),
+        meck:expect(db, unnotified_chats, [25, '_'], meck:seq(lists:duplicate(10, [12, 15]) ++ [[]])),
+        meck:expect(db, mark_chats_notified, fun(_, _) -> ok end),
+        meck:new(util),
+        meck:expect(util, pause, fun(_) -> ok end)
+    end,
+    fun(_) ->
+        meck:unload(util),
+        meck:unload(db),
+        meck:unload(date),
+        meck:unload(telegram)
+    end,
+    [fun should_retry_to_resend_message_to_failed_chats_3_times/1]}.
+
+should_retry_to_resend_message_to_failed_chats_3_times(_) ->
+    notifyer:evaluate_send_progress({25, 1000}),
+
+    [?_assertEqual(3, meck:num_calls(telegram, send_message, [12, {{2020, 01, 02}, {11, 30, 25}}])),
+     ?_assertEqual(3, meck:num_calls(telegram, send_message, [15, {{2020, 01, 02}, {11, 30, 25}}]))].

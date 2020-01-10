@@ -4,18 +4,19 @@
 evaluate_send_progress(BatchSpec) ->
     {H, M} = date:time(),
     if 
-        (H >= 11) and (M >= 30) -> send_progress(BatchSpec, date:now());
+        (H >= 11) and (M >= 30) -> send_progress(BatchSpec, date:now(), #{});
         true -> ok
     end.
 
-send_progress({BatchSize, BatchTime} = BatchSpec, CurrentDate) ->
+send_progress({BatchSize, BatchTime} = BatchSpec, CurrentDate, Tries) ->
     Pause = BatchTime / BatchSize,
-    case db:unnotified_chats(BatchSize, CurrentDate) of
+    Unnotified = db:unnotified_chats(BatchSize, CurrentDate) -- triple_failed_ids(Tries),
+    case Unnotified of
         [] -> ok;
         List -> 
-            SuccIds = filter_success([{send_message(Id, CurrentDate, Pause), Id} || Id <- List]),
+            {SuccIds, FailIds} = filter_success([{send_message(Id, CurrentDate, Pause), Id} || Id <- List]),
             db:mark_chats_notified(SuccIds, date:now()),
-            send_progress(BatchSpec, CurrentDate)
+            send_progress(BatchSpec, CurrentDate, merge_fail_count(FailIds, Tries))
     end.
 
 send_message(Id, ProgressDate, Pause) ->
@@ -23,10 +24,19 @@ send_message(Id, ProgressDate, Pause) ->
     util:pause(Pause),
     R.
 
+triple_failed_ids(IdCount) ->
+    maps:keys(maps:filter(fun(_, Count) -> Count >= 3 end, IdCount)).
+
+merge_fail_count(FailIds, IdCount) ->
+    lists:foldl(fun(Id, UpdIdCount) ->
+        maps:update_with(Id, fun(Count) -> Count+1 end, 1, UpdIdCount)
+    end, IdCount, FailIds).
+
 filter_success(SentList) ->
-    lists:filtermap(fun({Status, Id}) -> 
-        case Status of 
-            ok -> {true, Id};
-            _ -> false 
-        end 
-    end, SentList).
+    {Succ, Fail} = lists:foldl(fun({Status, Id}, {Succ, Fail}) ->
+        case Status of
+            ok -> {[Id | Succ], Fail};
+            _ -> {Succ, [Id | Fail]}
+        end
+    end, {[], []}, SentList),
+    {lists:reverse(Succ), lists:reverse(Fail)}.
