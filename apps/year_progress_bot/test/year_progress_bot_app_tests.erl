@@ -10,6 +10,7 @@ start_test_() ->
          meck:expect(year_progress_bot_sup, start_link, fun() -> ok end),
          meck:new(cowboy),
          meck:expect(cowboy, start_clear, fun(_,_,_) -> {ok, {}} end),
+         meck:expect(cowboy, stop_listener, fun(_) -> ok end),
          meck:new(cowboy_router),
          meck:expect(cowboy_router, compile, fun(_) -> dspch end),
          application:set_env([
@@ -27,7 +28,8 @@ start_test_() ->
      [fun should_create_db_schemas_on_start/1,
       fun should_start_bot_supervisor/1,
       fun should_compile_routes_to_endpoint/1,
-      fun should_start_endpoint/1]}.
+      fun should_start_endpoint/1,
+      fun should_stop_endpoint_on_stop/1]}.
 
 should_create_db_schemas_on_start(_) ->
     year_progress_bot_app:start({}, {}),
@@ -50,3 +52,7 @@ should_compile_routes_to_endpoint(_) ->
 should_start_endpoint(_) ->
     year_progress_bot_app:start({}, {}),
     ?_assert(meck:called(cowboy, start_clear, [http, 12345, #{env => #{dispatch => dspch}}])).
+
+should_stop_endpoint_on_stop(_) ->
+    year_progress_bot_app:stop(shutdown),
+    ?_assert(meck:called(cowboy, stop_listener, [http])).

@@ -14,6 +14,11 @@ start(_StartType, _StartArgs) ->
     launch_endpoint(),
     year_progress_bot_sup:start_link().
 
+stop(_State) ->
+    stop_endpoint(),
+    ok.
+
+%% internal functions
 launch_endpoint() ->
     Dispatch = cowboy_router:compile([
 		{'_', [
@@ -25,7 +30,5 @@ launch_endpoint() ->
     {ok, Port} = application:get_env(year_progress_bot, port),
     cowboy:start_clear(http, Port, #{env => #{dispatch => Dispatch}}).
 
-stop(_State) ->
-    ok.
-
-%% internal functions
+stop_endpoint() ->
+    cowboy:stop_listener(http).
