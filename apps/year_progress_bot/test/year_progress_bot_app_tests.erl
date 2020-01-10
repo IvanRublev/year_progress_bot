@@ -7,14 +7,21 @@ start_test_() ->
          meck:new(db),
          meck:expect(db, create_schema, fun() -> ok end),
          meck:new(year_progress_bot_sup),
-         meck:expect(year_progress_bot_sup, start_link, fun() -> ok end)
+         meck:expect(year_progress_bot_sup, start_link, fun() -> ok end),
+         meck:new(cowboy),
+         meck:expect(cowboy, start_clear, fun(_,_,_) -> {ok, {}} end),
+         meck:new(cowboy_router),
+         meck:expect(cowboy_router, compile, fun(_) -> dspch end)
      end,
      fun(_) ->
+         meck:unload(cowboy_router),
+         meck:unload(cowboy),
          meck:unload(year_progress_bot_sup),
          meck:unload(db)
      end,
      [fun should_create_db_schemas_on_start/1,
-      fun should_start_bot_supervisor/1]}.
+      fun should_start_bot_supervisor/1,
+      fun should_compile_routes_to_endpoint/1]}.
 
 
 should_create_db_schemas_on_start(_) ->
@@ -24,3 +31,13 @@ should_create_db_schemas_on_start(_) ->
 should_start_bot_supervisor(_) ->
     year_progress_bot_app:start({}, {}),
     ?_assert(meck:called(year_progress_bot_sup, start_link, [])).
+
+should_compile_routes_to_endpoint(_) ->
+    year_progress_bot_app:start({}, {}),
+    ?_assert(meck:called(cowboy_router, compile, [[
+		{'_', [
+			{"/start", endpoint, [start]},
+            {"/help", endpoint, [help]},
+            {"/progress", endpoint, [progress]}
+		]}
+	]])).
