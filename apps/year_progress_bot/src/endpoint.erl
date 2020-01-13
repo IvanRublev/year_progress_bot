@@ -1,2 +1,5 @@
 -module(endpoint).
-% -export([]).
+-export([init/2]).
+
+init(Req0, Opts) ->
+    ok.
