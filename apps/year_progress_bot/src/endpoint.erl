@@ -1,5 +1,5 @@
 -module(endpoint).
 -export([init/2]).
 
-init(Req0, Opts) ->
+init(_Req0, _Opts) ->
     ok.
