@@ -51,7 +51,7 @@ should_compile_routes_to_endpoint(_) ->
 
 should_start_endpoint(_) ->
     year_progress_bot_app:start({}, {}),
-    ?_assert(meck:called(cowboy, start_clear, [http, 12345, #{env => #{dispatch => dspch}}])).
+    ?_assert(meck:called(cowboy, start_clear, [http, [{port, 12345}], #{env => #{dispatch => dspch}}])).
 
 should_stop_endpoint_on_stop(_) ->
     year_progress_bot_app:stop(shutdown),

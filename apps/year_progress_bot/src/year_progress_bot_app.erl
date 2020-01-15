@@ -7,7 +7,7 @@
 
 -behaviour(application).
 
--export([start/2, stop/1]).
+-export([start/2, stop/1, launch_endpoint/0]).
 
 start(_StartType, _StartArgs) ->
     ok = db:create_schema(),
@@ -28,7 +28,7 @@ launch_endpoint() ->
 		]}
 	]),
     {ok, Port} = application:get_env(year_progress_bot, port),
-    cowboy:start_clear(http, Port, #{env => #{dispatch => Dispatch}}).
+    {ok, _} = cowboy:start_clear(http, [{port, Port}], #{env => #{dispatch => Dispatch}}).
 
 stop_endpoint() ->
     cowboy:stop_listener(http).
