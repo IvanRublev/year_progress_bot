@@ -27,7 +27,8 @@ all() ->
 
 should_reply_with_warning_about_periodic_notification(Config) ->
     Host = ?config(host_url, Config),
-    Response = ?perform_get(Host ++ "/start"),
-    ?assert_status(200, Response),
-    ?assert_body_contains("Bot would send the year progress bar daily.", Response),
+    Res = ?perform_get(Host ++ "/start"),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"text">>, <<"Bot would send the year progress bar daily.">>, Res),
     ok.
