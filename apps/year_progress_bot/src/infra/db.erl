@@ -12,10 +12,17 @@ mark_chats_notified(List, Date) ->
     [persist(Id, Date) || Id <- List].
 
 add_notified_chat(Id, Date) ->
-    persist(Id, Date).
+    persist(Id, Date, false).
 
-persist(Id, Date) ->
+persist(Id, Date, Ensure) ->
     Chat = chats:new(Id, Date),
     Changeset = sumo_changeset:cast(chats, Chat, #{}, [id, notified_at]),
     Valid = sumo_changeset:validate_required(Changeset, [id, notified_at]),
-    {ok, _} = sumo:persist(Valid).
+    Res = sumo:persist(Valid),
+    if Ensure ->
+        {ok, _} = Res;
+        true -> ok
+    end.
+
+persist(Id, Date) ->
+    persist(Id, Date, true).
