@@ -17,7 +17,6 @@ year_progress_bar(Date) ->
         {_, 1, 1} -> bar(BarLen, 0, 100, Y-1) ++ io_lib:format("~n~n", []) ++ bar(0, BarLen, 0, Y);
         _ -> bar(FillBar, EmptyBar, Percent, Y)
     end.
-    % io:format(user, "pc ~p ~p ~p", [PassedDays, TotalDays, Percent]),
 
 bar(FillBar, EmptyBar, Percent, Year) ->
     YearSp = lists:join(32, io_lib:format("~B", [Year])),
