@@ -1,4 +1,4 @@
--module(telegram_tests).
+-module(telegram_send_message_tests).
 -include_lib("eunit/include/eunit.hrl").
 
 send_test_() ->
@@ -46,7 +46,7 @@ should_POST_message_payload_to_telegram_server(_) ->
     telegram:send_message(15, {{2020,10,11}, {11,50}}),
 
     [?_assert(meck:called(shotgun, open, ["HOST", 443, https])),
-     ?_assert(meck:called(shotgun, post, ['_', "/botTOKEN/sendMessage", #{<<"content-type">> => <<"application/json">>}, <<"{json}">>])),
+     ?_assert(meck:called(shotgun, post, [123, "/botTOKEN/sendMessage", #{<<"content-type">> => <<"application/json">>}, <<"{json}">>])),
      ?_assert(meck:called(shotgun, close, [123]))].
 
 should_return_ok_on_status_2xx(_) ->

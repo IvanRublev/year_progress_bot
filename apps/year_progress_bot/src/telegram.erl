@@ -26,4 +26,15 @@ send_message(ChatId, ProgressDate) ->
     end.
 
 register_webhook() ->
-    ok.
+    {ok, Host} = application:get_env(year_progress_bot, tel_host),
+    {ok, Conn} = shotgun:open(Host, 443, https),
+    {ok, Token} = application:get_env(year_progress_bot, tel_token),
+    
+    {ok, SelfHost} = application:get_env(year_progress_bot, host),
+    {ok, HookPath} = application:get_env(year_progress_bot, webhook_path),
+    HookUrl = "https://" ++ SelfHost ++ HookPath,
+    Path = "/bot" ++ Token ++ "/setWebhook?" ++
+        "url=" ++ http_uri:encode(HookUrl) ++ 
+        "&allowed_updates=" ++ http_uri:encode("[\"message\",\"channel_post\"]"),
+    {ok, _} = shotgun:get(Conn, Path),
+    ok = shotgun:close(Conn).
