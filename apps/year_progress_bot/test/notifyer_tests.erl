@@ -45,6 +45,7 @@ send_in_batches_test_() ->
             {{2020, 01, 02}, {11, 31, 19}},
             {{2020, 01, 02}, {11, 32, 1}}
         ])),
+        meck:expect(date, end_of_today, fun() -> {{2020, 01, 02}, {23, 59, 59}} end),
         meck:new(db),
         meck:expect(db, unnotified_chats, [25, '_'], meck:seq([[X || X <- lists:seq(1,25)], [26, 27], []])),
         meck:expect(db, mark_chats_notified, fun(_, _) -> ok end),
@@ -89,8 +90,9 @@ should_pause_after_each_message_for_40ms(_) ->
 should_mark_chat_ids_as_notified_in_db(_) ->
     notifyer:evaluate_send_progress({25, 1000}),
 
-    [?_assert(meck:called(db, mark_chats_notified, [lists:seq(1,25), {{2020, 01, 02}, {11, 31, 19}}])),
-     ?_assert(meck:called(db, mark_chats_notified, [[26, 27], {{2020, 01, 02}, {11, 32, 1}}]))].
+    [?_assertEqual(2, meck:num_calls(date, end_of_today, [])),
+     ?_assert(meck:called(db, mark_chats_notified, [lists:seq(1,25), {{2020, 01, 02}, {23, 59, 59}}])),
+     ?_assert(meck:called(db, mark_chats_notified, [[26, 27], {{2020, 01, 02}, {23, 59, 59}}]))].
 
 should_mark_chat_ids_as_notified_in_db_only_on_success_send(_) ->
     meck:expect(telegram, send_message, ['_', '_'], meck:loop([ok, {error, {error_code, 500}}])),
@@ -99,11 +101,11 @@ should_mark_chat_ids_as_notified_in_db_only_on_success_send(_) ->
 
     [?_assert(meck:called(db, mark_chats_notified, [
         lists:filter(fun(E) -> E rem 2 /= 0 end, lists:seq(1,25)), 
-        {{2020, 01, 02}, {11, 31, 19}}
+        {{2020, 01, 02}, {23, 59, 59}}
      ])),
      ?_assert(meck:called(db, mark_chats_notified, [
         [27],
-        {{2020, 01, 02}, {11, 32, 1}}
+        {{2020, 01, 02}, {23, 59, 59}}
      ]))].
 
 %-------------------------
@@ -117,6 +119,7 @@ send_failure_test_() ->
         meck:expect(date, now, [], meck:seq([
             {{2020, 01, 02}, {11, 30, 25}}
         ])),
+        meck:expect(date, end_of_today, fun() -> {{2020, 01, 02}, {23, 59, 59}} end),
         meck:new(db),
         meck:expect(db, unnotified_chats, [25, '_'], meck:seq(lists:duplicate(10, [12, 15]) ++ [[]])),
         meck:expect(db, mark_chats_notified, fun(_, _) -> ok end),

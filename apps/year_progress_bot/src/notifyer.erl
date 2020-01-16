@@ -15,7 +15,7 @@ send_progress({BatchSize, BatchTime} = BatchSpec, CurrentDate, Tries) ->
         [] -> ok;
         List -> 
             {SuccIds, FailIds} = filter_success([{send_message(Id, CurrentDate, Pause), Id} || Id <- List]),
-            db:mark_chats_notified(SuccIds, date:now()),
+            db:mark_chats_notified(SuccIds, date:end_of_today()),
             send_progress(BatchSpec, CurrentDate, merge_fail_count(FailIds, Tries))
     end.
 
