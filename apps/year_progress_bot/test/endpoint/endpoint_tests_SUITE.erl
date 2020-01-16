@@ -32,7 +32,8 @@ end_per_testcase(_TestCase, _Config) ->
 all() -> 
     [should_reply_with_warning_about_periodic_notification_on_start,
      should_reply_with_chat_id_received_on_start,
-     should_reply_with_progress_bar_on_progress].
+     should_reply_with_progress_bar_on_progress,
+     should_reply_with_supported_commands_on_help].
 
 should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     Res = ?perform_post(
@@ -62,6 +63,17 @@ should_reply_with_progress_bar_on_progress(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"text">>, binary_to_list(<<"▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0">>), Res).
+
+should_reply_with_supported_commands_on_help(Config) ->
+    Res = ?perform_post(
+        ?config(host_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        json_message(1111111, <<"/help">>)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"text">>, "Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message", Res).
+
 
 json_message(ChatId, Text) -> 
     <<<<"{

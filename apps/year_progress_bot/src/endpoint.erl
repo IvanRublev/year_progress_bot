@@ -8,6 +8,7 @@ init(Req0, Opts) ->
     case Text of
         <<"/start">> -> reply_on_start(ChatId, Req0, Opts);
         <<"/progress">> -> reply_on_progress(ChatId, Req0, Opts);
+        <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
         _ -> error
     end.
 
@@ -34,6 +35,15 @@ reply_on_progress(ChatId, Req0, Opts) ->
 		<<"content-type">> => <<"application/json">>
 	}, jiffy:encode({[
         {<<"text">>, Msg},
+        {<<"chat_id">>, ChatId}
+    ]}), Req0),
+	{ok, Req, Opts}.
+
+reply_on_help(ChatId, Req0, Opts) ->
+    Req = cowboy_req:reply(200, #{
+		<<"content-type">> => <<"application/json">>
+	}, jiffy:encode({[
+        {<<"text">>, "Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message"},
         {<<"chat_id">>, ChatId}
     ]}), Req0),
 	{ok, Req, Opts}.
