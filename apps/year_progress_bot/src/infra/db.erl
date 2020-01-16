@@ -12,7 +12,7 @@ mark_chats_notified(List, Date) ->
     [persist(Id, Date) || Id <- List].
 
 add_notified_chat(Id, Date) ->
-    ok.
+    persist(Id, Date).
 
 persist(Id, Date) ->
     Chat = chats:new(Id, Date),

@@ -9,7 +9,7 @@ db_test_() ->
          meck:expect(sumo, find_by, fun(_, _, _, _) -> [] end),
          meck:expect(sumo, persist, fun(_) -> {ok, #{}} end),
          meck:new(sumo_changeset),
-         meck:expect(sumo_changeset, cast, fun(_, S,_,_) -> S end),
+         meck:expect(sumo_changeset, cast, fun(_, S, _, _) -> S end),
          meck:expect(sumo_changeset, validate_required, fun(S, _) -> S end)
      end,
      fun(_) ->
@@ -19,7 +19,8 @@ db_test_() ->
      [fun should_create_schema/1,
       fun should_request_unnotified_chats_as_notified_at_before_set_date/1,
       fun should_return_ids_of_unnotified_chats/1,
-      fun should_update_chats_with_ids_and_date/1]}.
+      fun should_update_chats_with_ids_and_date/1,
+      fun should_add_chat_with_id_and_date/1]}.
 
 should_create_schema(_) ->
     db:create_schema(),
@@ -47,3 +48,8 @@ should_update_chats_with_ids_and_date(_) ->
      ?_assert(meck:called(sumo, persist, [chats:new(3, {{2020,1,7}, {11,45}})])),
      ?_assert(meck:called(sumo, persist, [chats:new(6, {{2020,1,7}, {11,45}})])),
      ?_assert(meck:called(sumo, persist, [chats:new(7, {{2020,1,7}, {11,45}})]))].
+
+should_add_chat_with_id_and_date(_) ->
+    db:add_notified_chat(1234, {{2020, 01, 02}, {23, 59, 59}}),
+
+    ?_assert(meck:called(sumo, persist, [chats:new(1234, {{2020, 01, 02}, {23, 59, 59}})])).
