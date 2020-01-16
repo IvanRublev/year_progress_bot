@@ -11,11 +11,19 @@ init_per_suite(Config) ->
     {ok, _} = application:ensure_all_started(cowboy),
     application:set_env([
         {year_progress_bot, [
+            {tel_token, "tel_token"},
+            {tel_host, "tel_host"},
+            {host, "self.host"},
             {port, 8080},
             {webhook_path, "/some_uuid_path"}
         ]}
     ], [{persistent, true}]),
+
+    meck:new(telegram),
+    meck:expect(telegram, register_webhook, fun() -> ok end),
     year_progress_bot_app:launch_endpoint(),
+    meck:unload(telegram),
+
     [{host_url, "http://localhost:8080/some_uuid_path"} | Config].
 
 end_per_suite(_Config) ->
