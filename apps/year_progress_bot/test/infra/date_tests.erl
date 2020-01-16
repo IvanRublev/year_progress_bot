@@ -11,6 +11,7 @@ date_test_() ->
      end,
      [fun should_return_current_time_in_CET/1,
       fun should_return_todays_date_time_in_CET/1,
+      fun should_return_end_of_today_in_CET/1,
       fun should_return_1_jan_as_start_of_year/1,
       fun should_return_31_dec_as_end_of_year/1]}.
 
@@ -21,6 +22,11 @@ should_return_current_time_in_CET(_) ->
 should_return_todays_date_time_in_CET(_) ->
     Today = localtime:utc_to_local(calendar:universal_time(), "CET"),
     ?_assertEqual(Today, date:now()).
+
+should_return_end_of_today_in_CET(_) ->
+    {Date, _} = calendar:universal_time(),
+    EndOfToday = localtime:utc_to_local({Date, calendar:seconds_to_time(86399)}, "CET"),
+    ?_assertEqual(EndOfToday, date:end_of_today()).
 
 should_return_1_jan_as_start_of_year(_) ->
     meck:expect(calendar, universal_time, fun() -> {{2020,3,5},{15,22,35}} end),
