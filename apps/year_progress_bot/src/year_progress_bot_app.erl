@@ -23,7 +23,8 @@ launch_endpoint() ->
     {ok, Path} = application:get_env(year_progress_bot, webhook_path),
     Dispatch = cowboy_router:compile([{'_', [{Path, endpoint, []}]}]),
     {ok, Port} = application:get_env(year_progress_bot, port),
-    {ok, _} = cowboy:start_clear(http, [{port, Port}], #{env => #{dispatch => Dispatch}}).
+    {ok, _} = cowboy:start_clear(http, [{port, Port}], #{env => #{dispatch => Dispatch}}),
+    ok = telegram:register_webhook().
 
 stop_endpoint() ->
     cowboy:stop_listener(http).

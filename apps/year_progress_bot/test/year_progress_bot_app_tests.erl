@@ -13,14 +13,19 @@ start_test_() ->
          meck:expect(cowboy, stop_listener, fun(_) -> ok end),
          meck:new(cowboy_router),
          meck:expect(cowboy_router, compile, fun(_) -> dspch end),
+         meck:new(telegram),
+         meck:expect(telegram, register_webhook, fun() -> ok end),
          application:set_env([
             {year_progress_bot, [
+                {tel_token, "tel_token"},
+                {tel_host, "tel_host"},
                 {port, 12345},
                 {webhook_path, "/some_uuid_path"}
             ]}
          ], [{persistent, true}])
      end,
      fun(_) ->
+         meck:unload(telegram),
          meck:unload(cowboy_router),
          meck:unload(cowboy),
          meck:unload(year_progress_bot_sup),
@@ -30,7 +35,8 @@ start_test_() ->
       fun should_start_bot_supervisor/1,
       fun should_compile_route_to_endpoint/1,
       fun should_start_endpoint/1,
-      fun should_stop_endpoint_on_stop/1]}.
+      fun should_stop_endpoint_on_stop/1,
+      fun should_register_webhook_on_telegram/1]}.
 
 should_create_db_schemas_on_start(_) ->
     year_progress_bot_app:start({}, {}),
@@ -55,3 +61,7 @@ should_start_endpoint(_) ->
 should_stop_endpoint_on_stop(_) ->
     year_progress_bot_app:stop(shutdown),
     ?_assert(meck:called(cowboy, stop_listener, [http])).
+
+should_register_webhook_on_telegram(_) ->
+    year_progress_bot_app:start({}, {}),
+    ?_assert(meck:called(telegram, register_webhook, '_')).

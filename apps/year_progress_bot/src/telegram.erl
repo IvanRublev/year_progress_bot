@@ -1,5 +1,5 @@
 -module(telegram).
--export([send_message/2]).
+-export([send_message/2, register_webhook/0]).
 
 send_message(ChatId, ProgressDate) ->
     {ok, Host} = application:get_env(year_progress_bot, tel_host),
@@ -24,3 +24,6 @@ send_message(ChatId, ProgressDate) ->
             end;
         true -> {error, Status, Body}
     end.
+
+register_webhook() ->
+    ok.
