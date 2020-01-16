@@ -33,7 +33,8 @@ all() ->
     [should_reply_with_warning_about_periodic_notification_on_start,
      should_reply_with_chat_id_received_on_start,
      should_reply_with_progress_bar_on_progress,
-     should_reply_with_supported_commands_on_help].
+     should_reply_with_supported_commands_on_help,
+     should_reply_with_501_not_implemented_on_unknown_command].
 
 should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     Res = ?perform_post(
@@ -74,6 +75,15 @@ should_reply_with_supported_commands_on_help(Config) ->
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"text">>, "Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message", Res).
 
+should_reply_with_501_not_implemented_on_unknown_command(Config) ->
+    Res = ?perform_post(
+        ?config(host_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        json_message(1111111, <<"/unknown">>)
+    ),
+    ?assert_status(501, Res),
+    ?assert_header_value("content-type", "plain/text", Res),
+    ?assert_body("Not implemented", Res).
 
 json_message(ChatId, Text) -> 
     <<<<"{
