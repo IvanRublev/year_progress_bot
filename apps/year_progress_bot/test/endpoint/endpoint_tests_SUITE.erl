@@ -23,12 +23,37 @@ end_per_testcase(_TestCase, _Config) ->
     ok.
 
 all() -> 
-    [should_reply_with_warning_about_periodic_notification].
+    [should_reply_with_warning_about_periodic_notification,
+     should_reply_with_chat_id_received].
 
 should_reply_with_warning_about_periodic_notification(Config) ->
-    Host = ?config(host_url, Config),
-    Res = ?perform_get(Host ++ "/start"),
+    Res = ?perform_post(
+        ?config(host_url, Config) ++ "/start",
+        [{<<"content-type">>, <<"application/json">>}],
+        json_message(1, "/start")
+    ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"text">>, <<"Bot would send the year progress bar daily.">>, Res),
     ok.
+
+should_reply_with_chat_id_received(Config) ->
+    Res = ?perform_post(
+        ?config(host_url, Config) ++ "/start",
+        [{<<"content-type">>, <<"application/json">>}],
+        json_message(1213141, "/start")
+    ),
+    ?assert_json_value(<<"chat_id">>, 1213141, Res).
+
+json_message(ChatId, Text) -> 
+    <<<<"{
+        \"message\":{
+            \"chat\":{
+                \"last_name\":\"Test Lastname\",
+                \"id\":">>/binary, (list_to_binary(io_lib:format("~w", [ChatId])))/binary, <<",
+                \"first_name\":\"Test\",
+                \"username\":\"Test\"
+            },
+            \"text\":\"">>/binary, (list_to_binary(Text))/binary, <<"\"
+        }
+    }">>/binary>>.
