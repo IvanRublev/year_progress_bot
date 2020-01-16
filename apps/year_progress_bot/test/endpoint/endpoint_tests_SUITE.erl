@@ -42,7 +42,7 @@ should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
-    ?assert_json_value(<<"text">>, <<"Bot would send the year progress bar daily.">>, Res),
+    ?assert_json_value(<<"text">>, binary_to_list(<<"Bot will send the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0">>), Res),
     ok.
 
 should_reply_with_chat_id_received_on_start(Config) ->

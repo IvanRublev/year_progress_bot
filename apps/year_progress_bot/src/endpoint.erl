@@ -19,10 +19,11 @@ parse_update(Message) ->
     {ChatId, Text}.
 
 reply_on_start(ChatId, Req0, Opts) ->
+    Msg = "Bot will send the year progress bar daily.\nLike the following.\n" ++ formatter:year_progress_bar(date:now()),
     Req = cowboy_req:reply(200, #{
 		<<"content-type">> => <<"application/json">>
 	}, jiffy:encode({[
-        {<<"text">>, <<"Bot would send the year progress bar daily.">>},
+        {<<"text">>, Msg},
         {<<"chat_id">>, ChatId}
     ]}), Req0),
 	{ok, Req, Opts}.
