@@ -6,7 +6,9 @@ init(Req0, Opts) ->
     BodyJson = jiffy:decode(Body, [return_maps]),
     {ChatId, Text} = parse_update(BodyJson),
     case Text of
-        <<"/start">> -> reply_on_start(ChatId, Req0, Opts);
+        <<"/start">> ->
+            db:add_notified_chat(ChatId, date:end_of_today()),
+            reply_on_start(ChatId, Req0, Opts);
         <<"/progress">> -> reply_on_progress(ChatId, Req0, Opts);
         <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
         _ -> reply_not_implemented_error(Req0, Opts)

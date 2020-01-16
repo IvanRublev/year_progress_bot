@@ -7,9 +7,13 @@ db_test_() ->
          meck:new(sumo, [no_link, passthrough]),
          meck:expect(sumo, create_schema, fun() -> ok end),
          meck:expect(sumo, find_by, fun(_, _, _, _) -> [] end),
-         meck:expect(sumo, persist, fun(_) -> {ok, #{}} end)
+         meck:expect(sumo, persist, fun(_) -> {ok, #{}} end),
+         meck:new(sumo_changeset),
+         meck:expect(sumo_changeset, cast, fun(_, S,_,_) -> S end),
+         meck:expect(sumo_changeset, validate_required, fun(S, _) -> S end)
      end,
      fun(_) ->
+         meck:unload(sumo_changeset),
          meck:unload(sumo)
      end,
      [fun should_create_schema/1,
@@ -36,10 +40,6 @@ should_return_ids_of_unnotified_chats(_) ->
     ?_assertMatch([5, 8], db:unnotified_chats(10, {{2020,1,7}, {11,45}})).
 
 should_update_chats_with_ids_and_date(_) ->
-    meck:new(sumo_changeset),
-    meck:expect(sumo_changeset, cast, fun(_, S,_,_) -> S end),
-    meck:expect(sumo_changeset, validate_required, fun(S, _) -> S end),
-
     db:mark_chats_notified([3, 6, 7], {{2020,1,7}, {11,45}}),
 
     [?_assert(meck:called(sumo_changeset, cast, '_')),

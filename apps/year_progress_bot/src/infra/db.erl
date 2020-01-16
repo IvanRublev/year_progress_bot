@@ -1,5 +1,5 @@
 -module(db).
--export([create_schema/0, unnotified_chats/2, mark_chats_notified/2]).
+-export([create_schema/0, unnotified_chats/2, mark_chats_notified/2, add_notified_chat/2]).
 
 create_schema() ->
     sumo:create_schema().
@@ -10,6 +10,9 @@ unnotified_chats(Count, Date) ->
 
 mark_chats_notified(List, Date) ->
     [persist(Id, Date) || Id <- List].
+
+add_notified_chat(Id, Date) ->
+    ok.
 
 persist(Id, Date) ->
     Chat = chats:new(Id, Date),
