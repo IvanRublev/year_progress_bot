@@ -20,13 +20,8 @@ stop(_State) ->
 
 %% internal functions
 launch_endpoint() ->
-    Dispatch = cowboy_router:compile([
-		{'_', [
-			{"/start", endpoint, [start]},
-            {"/help", endpoint, [help]},
-            {"/progress", endpoint, [progress]}
-		]}
-	]),
+    {ok, Path} = application:get_env(year_progress_bot, webhook_path),
+    Dispatch = cowboy_router:compile([{'_', [{Path, endpoint, []}]}]),
     {ok, Port} = application:get_env(year_progress_bot, port),
     {ok, _} = cowboy:start_clear(http, [{port, Port}], #{env => #{dispatch => Dispatch}}).
 

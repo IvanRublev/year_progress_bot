@@ -9,9 +9,14 @@ suite() ->
 
 init_per_suite(Config) ->
     {ok, _} = application:ensure_all_started(cowboy),
-    application:set_env([{year_progress_bot, [{port, 8080}]}], [{persistent, true}]),
+    application:set_env([
+        {year_progress_bot, [
+            {port, 8080},
+            {webhook_path, "/some_uuid_path"}
+        ]}
+    ], [{persistent, true}]),
     year_progress_bot_app:launch_endpoint(),
-    [{host_url, "http://localhost:8080"} | Config].
+    [{host_url, "http://localhost:8080/some_uuid_path"} | Config].
 
 end_per_suite(_Config) ->
     application:stop(cowboy).
@@ -31,7 +36,7 @@ all() ->
 
 should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config) ++ "/start",
+        ?config(host_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/start">>)
     ),
@@ -42,7 +47,7 @@ should_reply_with_warning_about_periodic_notification_on_start(Config) ->
 
 should_reply_with_chat_id_received_on_start(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config) ++ "/start",
+        ?config(host_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1213141, <<"/start">>)
     ),
@@ -50,7 +55,7 @@ should_reply_with_chat_id_received_on_start(Config) ->
 
 should_reply_with_progress_bar_on_progress(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config) ++ "/start",
+        ?config(host_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/progress">>)
     ),

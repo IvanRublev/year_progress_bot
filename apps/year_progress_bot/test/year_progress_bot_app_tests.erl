@@ -15,7 +15,8 @@ start_test_() ->
          meck:expect(cowboy_router, compile, fun(_) -> dspch end),
          application:set_env([
             {year_progress_bot, [
-                {port, 12345}
+                {port, 12345},
+                {webhook_path, "/some_uuid_path"}
             ]}
          ], [{persistent, true}])
      end,
@@ -27,7 +28,7 @@ start_test_() ->
      end,
      [fun should_create_db_schemas_on_start/1,
       fun should_start_bot_supervisor/1,
-      fun should_compile_routes_to_endpoint/1,
+      fun should_compile_route_to_endpoint/1,
       fun should_start_endpoint/1,
       fun should_stop_endpoint_on_stop/1]}.
 
@@ -39,13 +40,11 @@ should_start_bot_supervisor(_) ->
     year_progress_bot_app:start({}, {}),
     ?_assert(meck:called(year_progress_bot_sup, start_link, [])).
 
-should_compile_routes_to_endpoint(_) ->
+should_compile_route_to_endpoint(_) ->
     year_progress_bot_app:start({}, {}),
     ?_assert(meck:called(cowboy_router, compile, [[
 		{'_', [
-			{"/start", endpoint, [start]},
-            {"/help", endpoint, [help]},
-            {"/progress", endpoint, [progress]}
+			{"/some_uuid_path", endpoint, []}
 		]}
 	]])).
 
