@@ -1,5 +1,17 @@
 -module(notifyer_worker).
--export([loop/1]).
+-export([child_spec/0,loop/1]).
+
+child_spec() ->
+    #{id => notifyer_worker, 
+      restart => permanent,
+      start => {notifyer_worker, start_link, []}}.
+
+start_link() ->
+    spawn_link(fun run_loop/0).
+
+run_loop() ->
+    {ok, Period} = application:get_env(year_progress_bot, notifyer_loop_period),
+    loop(Period).
 
 loop(Period) ->
     receive after Period ->
