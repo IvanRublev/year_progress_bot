@@ -1,5 +1,5 @@
 -module(notifyer_worker).
--export([child_spec/0,loop/1]).
+-export([child_spec/0,start_link/0,loop/1,init/1]).
 
 child_spec() ->
     #{id => notifyer_worker, 
@@ -7,11 +7,18 @@ child_spec() ->
       start => {notifyer_worker, start_link, []}}.
 
 start_link() ->
-    spawn_link(fun run_loop/0).
+    proc_lib:start_link(?MODULE, init, [self()]).
 
-run_loop() ->
-    {ok, Period} = application:get_env(year_progress_bot, notifyer_loop_period),
-    loop(Period).
+init(Parent) ->
+    case application:get_env(year_progress_bot, notifyer_loop_period) of
+        {ok, Period} -> 
+            proc_lib:init_ack(Parent, {ok, self()}),
+            loop(Period);
+
+        _ -> 
+            exit(no_loop_period_setting)
+    end.
+
 
 loop(Period) ->
     receive after Period ->
