@@ -1,4 +1,4 @@
--module(notifyer_sup).
+-module(notifyer_worker).
 -export([loop/1]).
 
 loop(Period) ->

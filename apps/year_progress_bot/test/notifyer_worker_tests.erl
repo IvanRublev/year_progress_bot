@@ -1,4 +1,4 @@
--module(notifyer_sup_tests).
+-module(notifyer_worker_tests).
 -include_lib("eunit/include/eunit.hrl").
 
 periodic_send_test_() ->
@@ -9,14 +9,14 @@ periodic_send_test_() ->
      fun should_limit_send_for_25_messages_per_second/1]}.
 
 should_evaluate_send_of_progress_periodically(_) ->
-    Pid = spawn(notifyer_sup, loop, [1]),
+    Pid = spawn(notifyer_worker, loop, [1]),
     receive after 10 -> ok end,
     exit(Pid, exit),
 
     ?_assert(meck:num_calls(notifyer, evaluate_send_progress, '_') >= 3).
 
 should_limit_send_for_25_messages_per_second(_) ->
-    Pid = spawn(notifyer_sup, loop, [1]),
+    Pid = spawn(notifyer_worker, loop, [1]),
     receive after 10 -> ok end,
     exit(Pid, exit),
 
