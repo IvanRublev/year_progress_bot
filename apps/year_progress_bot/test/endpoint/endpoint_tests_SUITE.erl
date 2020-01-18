@@ -32,9 +32,11 @@ end_per_suite(_Config) ->
 init_per_testcase(_TestCase, Config) ->
     meck:new(calendar, [unstick, passthrough]),
     meck:expect(calendar, universal_time, fun() -> {{2020,2,25},{10,12,30}} end),
+    meck:new(db, [{stub_all, ok}]),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->
+    meck:unload(db),
     meck:unload(calendar).
 
 all() -> 
