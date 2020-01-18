@@ -1,0 +1,21 @@
+% Append build number to version number in config
+{ok, File} = file:open("BUILD",[read]),
+{ok, BuildStr} = file:read(File,1024),
+file:close(File),
+io:format("App build number is: ~s~n", [BuildStr]),
+
+{value, RelxTup, _} = lists:keytake(relx, 1, CONFIG),
+{relx, Relx} = RelxTup,
+{value, ReleaseTup, _} = lists:keytake(release, 1, Relx),
+{release, Release, Opts} = ReleaseTup,
+{AppName, Ver} = Release,
+
+VerUpd = Ver ++ BuildStr,
+
+ReleaseUpd = {AppName, VerUpd},
+ReleaseTupUpd = {release, ReleaseUpd, Opts},
+RelxUpd = lists:keystore(release, 1, Relx, ReleaseTupUpd),
+RelxTupUpd = {relx, RelxUpd},
+CONFIG_UPD = lists:keystore(relx, 1, CONFIG, RelxTupUpd),
+
+CONFIG_UPD.
