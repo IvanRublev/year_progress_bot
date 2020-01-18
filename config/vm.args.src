@@ -1,6 +1,6 @@
 -sname year_progress_bot
 
--setcookie year_progress_bot_cookie
+-setcookie "${COOKIE}"
 
 +K true
 +A30

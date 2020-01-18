@@ -1,11 +1,11 @@
 [
   {year_progress_bot, [
-    {tel_token, "real_token"},
-    {tel_host, "api.telegram.org"},
-    {host, "yprb.ivanrublev.me"},
-    {port, 8080},
-    {webhook_path, "/e3a12e97-9949-4c2c-af1a-c77504498a44"},
-    {notifyer_loop_period, 60000}
+    {tel_token, "${TEL_TOKEN}"},
+    {tel_host, "${TEL_HOST}"},
+    {host, "${HOST}"},
+    {port, ${PORT}},
+    {webhook_path, "${WEBHOOK_PATH}"},
+    {notifyer_loop_period, ${NOTIFIER_LOOP_PERIOD}}
   ]},
   {sumo_db, [
     {wpool_opts, [{overrun_warning, 100}]},
