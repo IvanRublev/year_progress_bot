@@ -33,7 +33,7 @@ start_test_() ->
      end,
      [fun should_create_db_schemas_on_start/1,
       fun should_start_bot_supervisor/1,
-      fun should_compile_route_to_endpoint/1,
+      fun should_compile_route_to_endpoints/1,
       fun should_start_endpoint/1,
       fun should_stop_endpoint_on_stop/1,
       fun should_register_webhook_on_telegram/1]}.
@@ -46,11 +46,12 @@ should_start_bot_supervisor(_) ->
     year_progress_bot_app:start({}, {}),
     ?_assert(meck:called(year_progress_bot_sup, start_link, [])).
 
-should_compile_route_to_endpoint(_) ->
+should_compile_route_to_endpoints(_) ->
     year_progress_bot_app:start({}, {}),
     ?_assert(meck:called(cowboy_router, compile, [[
 		{'_', [
-			{"/some_uuid_path", endpoint, []}
+			{"/some_uuid_path", endpoint, []},
+            {"/health", health, []}
 		]}
 	]])).
 

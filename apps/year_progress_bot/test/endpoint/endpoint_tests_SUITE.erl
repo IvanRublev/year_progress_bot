@@ -24,7 +24,10 @@ init_per_suite(Config) ->
     year_progress_bot_app:launch_endpoint(),
     meck:unload(telegram),
 
-    [{host_url, "http://localhost:8080/some_uuid_path"} | Config].
+    lists:merge([
+        {bot_endpoint_url, "http://localhost:8080/some_uuid_path"},
+        {health_endpoint_url, "http://localhost:8080/health"}
+    ], Config).
 
 end_per_suite(_Config) ->
     application:stop(cowboy).
@@ -44,11 +47,12 @@ all() ->
      should_reply_with_chat_id_received_on_start,
      should_reply_with_progress_bar_on_progress,
      should_reply_with_supported_commands_on_help,
-     should_reply_with_501_not_implemented_on_unknown_command].
+     should_reply_with_501_not_implemented_on_unknown_command,
+     should_reply_ok_on_health_path].
 
 should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config),
+        ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/start">>)
     ),
@@ -59,7 +63,7 @@ should_reply_with_warning_about_periodic_notification_on_start(Config) ->
 
 should_reply_with_chat_id_received_on_start(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config),
+        ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1213141, <<"/start">>)
     ),
@@ -67,7 +71,7 @@ should_reply_with_chat_id_received_on_start(Config) ->
 
 should_reply_with_progress_bar_on_progress(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config),
+        ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/progress">>)
     ),
@@ -77,7 +81,7 @@ should_reply_with_progress_bar_on_progress(Config) ->
 
 should_reply_with_supported_commands_on_help(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config),
+        ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/help">>)
     ),
@@ -87,13 +91,18 @@ should_reply_with_supported_commands_on_help(Config) ->
 
 should_reply_with_501_not_implemented_on_unknown_command(Config) ->
     Res = ?perform_post(
-        ?config(host_url, Config),
+        ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/unknown">>)
     ),
     ?assert_status(501, Res),
     ?assert_header_value("content-type", "plain/text", Res),
     ?assert_body("Not implemented", Res).
+
+should_reply_ok_on_health_path(Config) ->
+    Res = ?perform_get(?config(health_endpoint_url, Config)),
+    ?assert_status(200, Res),
+    ?assert_body("ok", Res).
 
 json_message(ChatId, Text) -> 
     <<<<"{
