@@ -20,3 +20,6 @@ rebar3.crashdump
 deps
 rel
 .concrete/DEV_MODE
+
+# Environment variables with secrets for mix to use with asdf-direnv
+.env
