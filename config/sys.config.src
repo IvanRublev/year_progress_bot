@@ -15,7 +15,7 @@
       {our_backend_pgsql, sumo_backend_pgsql, [
         {host, "${PGSQL_HOST}"},
         {port, ${PGSQL_PORT}},
-        {database, "yrpb"},
+        {database, "${PGSQL_DATABASE}"},
         {username, "${PGSQL_USERNAME}"},
         {password, "${PGSQL_PASSWORD}"}
       ]}

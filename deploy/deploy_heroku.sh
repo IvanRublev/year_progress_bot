@@ -37,6 +37,15 @@ if [ "$answer" != "${answer#[Nn]}" ]; then
 fi
 heroku config:set -a $app $(cat ../.env | xargs)
 
+echo "Add database connection setting"
+DATABASE_URL=$(heroku config:get DATABASE_URL -a $app)
+if [[ $DATABASE_URL =~ postgres:\/\/([^:]+):([^@]+)@([^:]+):([^\/]+)\/(.+) ]]; then
+    heroku config:set -a $app PGSQL_HOST=${BASH_REMATCH[3]} PGSQL_PORT=${BASH_REMATCH[4]} PGSQL_USERNAME=${BASH_REMATCH[1]} PGSQL_PASSWORD=${BASH_REMATCH[2]} PGSQL_DATABASE=${BASH_REMATCH[5]}
+else
+    echo "Failed to parse DB connection string: $DATABASE_URL"
+    exit 35
+fi
+
 echo "
 === Add erlang buildpack
 "
