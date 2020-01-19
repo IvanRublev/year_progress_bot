@@ -5,6 +5,22 @@ type heroku >/dev/null 2>&1 || { echo >&2 "heroku cli is required."; exit 1; }
 
 app='yrpb-bot'
 
+echo "
+=== Add PostreSQL database to the app
+"
+echo -n "Should we add the postgres addon to the app (y/n)? "
+read answer
+if [ "$answer" != "${answer#[Yy]}" ]; then
+    if [[ $(heroku addons -a $app | grep postgresql) ]]; then
+        echo "Already have database added."
+    else
+        heroku addons:create heroku-postgresql:hobby-dev -a $app --version=12
+        heroku pg:diagnose -a $app
+    fi
+    echo "Connection DATABASE_URL:"
+    heroku config:get DATABASE_URL -a $app
+fi
+
 branch='master'
 if [[ "$(git branch | grep \* | cut -d ' ' -f2)" != "${branch}" ]]; then
     echo "We should be on branch ${branch} to continue. Config file commit is possible."
