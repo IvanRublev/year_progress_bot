@@ -57,12 +57,18 @@ heroku config:set -a $app REBAR_PROFILE=prod
 echo "
 === Configure erlang buildpack
 "
+export $(cat ../.tool-versions | sed -e "s/ /=/g" | xargs)
 echo "
 Add preffered OTP version
 "
-export $(cat ../.tool-versions | sed -e "s/ /=/g" | xargs)
 preffered_otp='../.preferred_otp_version'
 echo "${erlang}" > $preffered_otp
+
+echo "
+Add preffered Rebar3 version
+"
+preffered_rebar3='../.preferred_rebar3_version'
+echo "${rebar}" > $preffered_rebar3
 
 echo "
 Add web dyno start command
@@ -71,7 +77,7 @@ release_app=$(basename $(cd .. && pwd))
 procfile='../Procfile'
 echo "web: _build/prod/rel/${release_app}/bin/${release_app} foreground" > $procfile
 
-git add $preffered_otp $procfile
+git add $preffered_otp $preffered_rebar3 $procfile
 git commit --amend --no-edit || true
 
 heroku buildpacks:set "https://github.com/IvanRublev/cf-buildpack-erlang" -a $app || true
