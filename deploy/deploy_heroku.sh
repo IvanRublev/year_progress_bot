@@ -37,7 +37,9 @@ if [ "$answer" != "${answer#[Nn]}" ]; then
 fi
 heroku config:set -a $app $(cat ../.env | xargs)
 
-echo "Add database connection setting"
+echo "
+Add database connection setting
+"
 DATABASE_URL=$(heroku config:get DATABASE_URL -a $app)
 if [[ $DATABASE_URL =~ postgres:\/\/([^:]+):([^@]+)@([^:]+):([^\/]+)\/(.+) ]]; then
     heroku config:set -a $app PGSQL_HOST=${BASH_REMATCH[3]} PGSQL_PORT=${BASH_REMATCH[4]} PGSQL_USERNAME=${BASH_REMATCH[1]} PGSQL_PASSWORD=${BASH_REMATCH[2]} PGSQL_DATABASE=${BASH_REMATCH[5]}
@@ -46,20 +48,23 @@ else
     exit 35
 fi
 
+
 echo "
-=== Add erlang buildpack
+=== Configure erlang buildpack
 "
-export $(cat ../.tool-versions | sed -e "s/ /=/g" | xargs)
 echo "
 Add preffered OTP version
 "
+export $(cat ../.tool-versions | sed -e "s/ /=/g" | xargs)
 preffered_otp='../.preferred_otp_version'
 echo "${erlang}" > $preffered_otp
+
 echo "
-Add foreground start command
+Add web dyno start command
 "
+release_app=$(basename $(cd .. && pwd))
 procfile='../Procfile'
-echo "web: _build/default/rel/year_progress_bot/bin/year_progress_bot foreground" > $procfile
+echo "web: _build/prod/rel/${release_app}/bin/${release_app} foreground" > $procfile
 
 git add $preffered_otp $procfile
 git commit --amend --no-edit || true
@@ -76,4 +81,4 @@ if [ "$answer" != "${answer#[Nn]}" ]; then
     exit 4 
 fi
 
-git push heroku $branch
+git push -f heroku $branch
