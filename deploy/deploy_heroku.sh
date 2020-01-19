@@ -48,6 +48,11 @@ else
     exit 35
 fi
 
+echo "
+Add rebar3 build profile
+"
+heroku config:set -a $app REBAR_PROFILE=prod
+
 
 echo "
 === Configure erlang buildpack
@@ -69,9 +74,7 @@ echo "web: _build/prod/rel/${release_app}/bin/${release_app} foreground" > $proc
 git add $preffered_otp $procfile
 git commit --amend --no-edit || true
 
-heroku buildpacks:set "https://github.com/ChrisWhealy/cf-buildpack-erlang" -a $app ||
-heroku buildpacks:add --index 1 "https://github.com/peergradeio/heroku-buildpack-envvars.git" || true
-# see bin/envvars
+heroku buildpacks:set "https://github.com/IvanRublev/cf-buildpack-erlang" -a $app || true
 
 echo "
 === Deploy ${app} app

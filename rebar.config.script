@@ -2,7 +2,7 @@
 {ok, File} = file:open("BUILD",[read]),
 {ok, BuildStr} = file:read(File,1024),
 file:close(File),
-io:format("App build number is: ~s~n", [BuildStr]),
+io:format("App build number is: ~s, REBAR_PROFILE is: ~s~n", [BuildStr, os:getenv("REBAR_PROFILE", "undef")]),
 
 {value, RelxTup, _} = lists:keytake(relx, 1, CONFIG),
 {relx, Relx} = RelxTup,
