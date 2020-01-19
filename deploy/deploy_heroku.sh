@@ -86,10 +86,12 @@ echo "
 === Deploy ${app} app
 "
 heroku apps:info -a $app
-echo -n "This would push the local branch *${branch} to the remote gigalixir. Continue (y/n)? "
+echo -n "This would push the local branch *${branch} to the remote heroku. Continue (y/n)? "
 read answer
 if [ "$answer" != "${answer#[Nn]}" ]; then
     exit 4 
 fi
 
 git push -f heroku $branch
+
+heroku ps -a $app
