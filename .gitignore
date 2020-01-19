@@ -23,3 +23,4 @@ rel
 
 # Environment variables with secrets for mix to use with asdf-direnv
 .env
+.env-prod

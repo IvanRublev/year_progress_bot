@@ -28,14 +28,14 @@ if [[ "$(git branch | grep \* | cut -d ' ' -f2)" != "${branch}" ]]; then
 fi
 
 echo "
-=== Set environment variables for ${app} app with content of .env file and others
+=== Set environment variables for ${app} app with content of .env-prod file and others
 "
 echo -n "This would cause currently running app to restart. Continue (y/n)? "
 read answer
 if [ "$answer" != "${answer#[Nn]}" ]; then
     exit 3
 fi
-heroku config:set -a $app $(cat ../.env | xargs)
+heroku config:set -a $app $(cat ../.env-prod | xargs)
 
 echo "
 Add database connection setting
