@@ -96,12 +96,13 @@ should_reply_with_501_not_implemented_on_unknown_command(Config) ->
         json_message(1111111, <<"/unknown">>)
     ),
     ?assert_status(501, Res),
-    ?assert_header_value("content-type", "plain/text", Res),
+    ?assert_header_value("content-type", "text/html", Res),
     ?assert_body("Not implemented", Res).
 
 should_reply_ok_on_health_path(Config) ->
     Res = ?perform_get(?config(health_endpoint_url, Config)),
     ?assert_status(200, Res),
+    ?assert_header_value("content-type", "text/html", Res),
     ?assert_body("ok", Res).
 
 json_message(ChatId, Text) -> 

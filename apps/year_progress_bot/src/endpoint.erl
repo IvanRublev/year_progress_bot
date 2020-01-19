@@ -51,5 +51,5 @@ reply_on_help(ChatId, Req0, Opts) ->
 	{ok, Req, Opts}.
 
 reply_not_implemented_error(Req0, Opts) ->
-    Req = cowboy_req:reply(501, #{<<"content-type">> => <<"plain/text">>}, "Not implemented", Req0),
+    Req = cowboy_req:reply(501, #{<<"content-type">> => <<"text/html">>}, "Not implemented", Req0),
 	{ok, Req, Opts}.
