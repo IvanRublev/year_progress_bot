@@ -14,7 +14,8 @@ register_test_() ->
                 {tel_host, "HOST"},
                 {host, "SELF.HOST"},
                 {port, 8080},
-                {webhook_path, "/af1a-c775"}
+                {webhook_path, "/af1a-c775"},
+                {telegram_integrate, true}
             ]}
          ], [{persistent, true}])
      end,

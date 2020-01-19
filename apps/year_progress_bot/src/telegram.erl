@@ -1,7 +1,14 @@
 -module(telegram).
 -export([send_message/2, register_webhook/0]).
 
+
 send_message(ChatId, ProgressDate) ->
+    case application:get_env(year_progress_bot, telegram_integrate) of
+        {ok, true} -> send_message_fun(ChatId, ProgressDate);
+        _ -> ok
+    end.
+
+send_message_fun(ChatId, ProgressDate) ->
     {ok, Host} = application:get_env(year_progress_bot, tel_host),
     {ok, Conn} = shotgun:open(Host, 443, https),
     {ok, Token} = application:get_env(year_progress_bot, tel_token),
@@ -26,6 +33,12 @@ send_message(ChatId, ProgressDate) ->
     end.
 
 register_webhook() ->
+    case application:get_env(year_progress_bot, telegram_integrate) of
+        {ok, true} -> register_webhook_fun();
+        _ -> ok
+    end.
+
+register_webhook_fun() ->
     {ok, Host} = application:get_env(year_progress_bot, tel_host),
     {ok, Conn} = shotgun:open(Host, 443, https),
     {ok, Token} = application:get_env(year_progress_bot, tel_token),

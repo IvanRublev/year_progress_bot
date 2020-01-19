@@ -16,7 +16,8 @@ send_test_() ->
          application:set_env([
             {year_progress_bot, [
                 {tel_token, "TOKEN"},
-                {tel_host, "HOST"}
+                {tel_host, "HOST"},
+                {telegram_integrate, true}
             ]}
          ], [{persistent, true}])
      end,

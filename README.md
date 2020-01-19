@@ -23,7 +23,8 @@ Make sure that a PostgresSQL instance is running on local machine.
 Create a `.env` file containing following configuration variables:
 
     TEL_TOKEN=a_ttoken
-    TEL_HOST=telegram.host
+    TEL_HOST=api.telegram.org.host
+    TEL_INTEGRATE=false
     HOST=localhost
     WEBHOOK_PATH=/wh_path
     NOTIFIER_LOOP_PERIOD=60000
@@ -40,7 +41,7 @@ Then run server with `rebar3 shell`
 Deployment on Heroku
 --------------------
 
-Create `.env-prod` file contatining production values for keys shown above except `PGSQL_*`. Database configuration would be added automatically.
+Create `.env-prod` file contatining production values for keys shown above except `PGSQL_*`. And set `TEL_INTEGRATE=true`. Database configuration would be added automatically.
 
 Install Heroku CLI and create an app.
 

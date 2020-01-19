@@ -2,6 +2,7 @@
   {year_progress_bot, [
     {tel_token, "${TEL_TOKEN}"},
     {tel_host, "${TEL_HOST}"},
+    {tel_integrate, ${TEL_INTEGRATE}},
     {host, "${HOST}"},
     {port, ${PORT}},
     {webhook_path, "${WEBHOOK_PATH}"},
