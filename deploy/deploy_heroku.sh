@@ -50,18 +50,21 @@ echo "
 === Add erlang buildpack
 "
 export $(cat ../.tool-versions | sed -e "s/ /=/g" | xargs)
-if [[ $erlang =~ ([0-9]+).([0-9]+).+ ]]; then
-    preffered_otp='../.preferred_otp_version'
-    echo "OTP-${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" > $preffered_otp
-    echo "
-    "
-    git add $preffered_otp
-    git commit --amend --no-edit || true
-else
-    echo "Failed to parse major and minor erlang's version numbers: $erlang"
-    exit 36
-fi
-heroku config:add BUILDPACK_URL="https://github.com/yycking/heroku-buildpack-erlang.git" -a $app
+echo "
+Add preffered OTP version
+"
+preffered_otp='../.preferred_otp_version'
+echo "${erlang}" > $preffered_otp
+echo "
+Add foreground start command
+"
+procfile='../Procfile'
+echo "web: _build/default/rel/year_progress_bot/bin/year_progress_bot foreground" > $procfile
+
+git add $preffered_otp $procfile
+git commit --amend --no-edit || true
+
+heroku config:add BUILDPACK_URL="https://github.com/ChrisWhealy/cf-buildpack-erlang" -a $app
 
 echo "
 === Deploy ${app} app

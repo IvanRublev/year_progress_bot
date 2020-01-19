@@ -5,6 +5,9 @@
 +K true
 +A30
 
+# Disable the break handler i.e. exit with one Ctrl+C
++B
+
 # Disable busy waiting to discard CPU preheating for lower costs in cloud environment
 +sbwt none
 +sbwtdcpu none
