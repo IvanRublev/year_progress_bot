@@ -69,7 +69,9 @@ echo "web: _build/prod/rel/${release_app}/bin/${release_app} foreground" > $proc
 git add $preffered_otp $procfile
 git commit --amend --no-edit || true
 
-heroku config:add BUILDPACK_URL="https://github.com/ChrisWhealy/cf-buildpack-erlang" -a $app
+heroku buildpacks:set "https://github.com/ChrisWhealy/cf-buildpack-erlang" -a $app ||
+heroku buildpacks:add --index 1 "https://github.com/peergradeio/heroku-buildpack-envvars.git" || true
+# see bin/envvars
 
 echo "
 === Deploy ${app} app
