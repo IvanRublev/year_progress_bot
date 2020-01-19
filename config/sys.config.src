@@ -13,11 +13,11 @@
     {query_timeout, 30000},
     {storage_backends, [
       {our_backend_pgsql, sumo_backend_pgsql, [
-        {host, "127.0.0.1"},
-        {port, 25432},
+        {host, "${PGSQL_HOST}"},
+        {port, ${PGSQL_PORT}},
         {database, "yrpb"},
-        {username, "postgres"},
-        {password, "postgres"}
+        {username, "${PGSQL_USERNAME}"},
+        {password, "${PGSQL_PASSWORD}"}
       ]}
     ]},
     {stores, [
