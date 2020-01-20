@@ -6,7 +6,7 @@ init(Req0, Opts) ->
     lager:debug("Endpoint requested ->"),
     case cowboy_req:read_urlencoded_body(Req0) of 
         {ok, [{Body, true}], _} ->
-            lager:debug("-> Body: ~s...", formatter:gun_request_body_printable(Body)),
+            lager:debug("-> Body: ~s", formatter:gun_request_body_printable(Body)),
             BodyJson = jiffy:decode(Body, [return_maps]),
             case parse_update(BodyJson) of
                 {ChatId, Text} ->

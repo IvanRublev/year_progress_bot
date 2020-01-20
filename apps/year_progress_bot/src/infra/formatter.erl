@@ -30,5 +30,13 @@ gun_response_printable(Resp) ->
 list_body_first(Body, Len) ->
     binary:bin_to_list(Body, {0, min(Len, byte_size(Body))}).
 
+list_body_last(Body, Len) ->
+    binary:bin_to_list(Body, {byte_size(Body), -min(Len, byte_size(Body))}).
+
 gun_request_body_printable(Body) ->
-    [list_body_first(Body, 255)].
+    First = list_body_first(Body, 200),
+    Last = list_body_last(Body, 50),
+    [if 
+        length(First)+length(Last) > 0 -> First ++ " ... " ++ Last;
+        true -> ""
+    end].
