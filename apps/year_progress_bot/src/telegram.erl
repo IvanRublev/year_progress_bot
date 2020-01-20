@@ -1,6 +1,6 @@
 -module(telegram).
 -export([send_message/2, register_webhook/0]).
-
+-compile([{parse_transform, lager_transform}]).
 
 send_message(ChatId, ProgressDate) ->
     case application:get_env(year_progress_bot, telegram_integrate) of
@@ -20,7 +20,7 @@ send_message_fun(ChatId, ProgressDate) ->
     {ok, Response} = shotgun:post(Conn, Path, Headers, Payload),
     
     ok = shotgun:close(Conn),
-    
+
     #{status_code := Status, body := Body} = Response,
     if 
         (Status >= 200) and (Status =< 299) -> 
@@ -41,13 +41,15 @@ register_webhook() ->
 register_webhook_fun() ->
     {ok, Host} = application:get_env(year_progress_bot, tel_host),
     {ok, Conn} = shotgun:open(Host, 443, https),
-    {ok, Token} = application:get_env(year_progress_bot, tel_token),
-    
+
     {ok, SelfHost} = application:get_env(year_progress_bot, host),
     {ok, HookPath} = application:get_env(year_progress_bot, webhook_path),
+    {ok, Token} = application:get_env(year_progress_bot, tel_token),
     HookUrl = "https://" ++ SelfHost ++ HookPath,
     Path = "/bot" ++ Token ++ "/setWebhook?" ++
         "url=" ++ http_uri:encode(HookUrl) ++ 
         "&allowed_updates=" ++ http_uri:encode("[\"message\",\"channel_post\"]"),
-    {ok, _} = shotgun:get(Conn, Path),
+    {ok, Response} = shotgun:get(Conn, Path),
+    lager:info("Registered Webhook with response ~p~n", [Response]),
+    
     ok = shotgun:close(Conn).

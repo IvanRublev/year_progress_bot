@@ -1,5 +1,6 @@
 -module(notifyer).
 -export([evaluate_send_progress/1]).
+-compile([{parse_transform, lager_transform}]).
 
 evaluate_send_progress(BatchSpec) ->
     {H, M} = date:time(),
@@ -15,6 +16,7 @@ send_progress({BatchSize, BatchTime} = BatchSpec, CurrentDate, Tries) ->
         [] -> ok;
         List -> 
             {SuccIds, FailIds} = filter_success([{send_message(Id, CurrentDate, Pause), Id} || Id <- List]),
+            lager:info("Notifications on ~p: succeeded ~p, failed ~p.", [CurrentDate, length(SuccIds), length(FailIds)]),
             db:mark_chats_notified(SuccIds, date:end_of_today()),
             send_progress(BatchSpec, CurrentDate, merge_fail_count(FailIds, Tries))
     end.
