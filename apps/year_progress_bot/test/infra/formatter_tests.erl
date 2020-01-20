@@ -79,8 +79,8 @@ should_give_short_info_about_short_gun_response(_) ->
 
 should_give_short_info_about_long_request_body(_) ->
     ?_assertMatch(
-        ["this is a beginning part of a long response body, we want to keep the log output clean, because of that we return not the full body as you may expects, but only first 255 bytes of the response, that o ... -----------------345-----this is 285 bytes binary."],
-        formatter:gun_request_body_printable(<<"this is a beginning part of a long response body, we want to keep the log output clean, because of that we return not the full body as you may expects, but only first 255 bytes of the response, that one can call a pragmatic approach. 1-----------------345-----this is 285 bytes binary.">>)
+        [" ...  bytes of the response, that one can call a pragmatic approach. 1-----------------345-----this is 285 bytes binary.this is a beginning part of a long response body, we want to keep the log output clean, because of that we return not the full body as you may expects, but only first 255 bytes of the response, that one can call a pragmatic approach. 1-----------------345-----this is 285 bytes binary."],
+        formatter:gun_request_body_printable(<<"this is a beginning part of a long response body, we want to keep the log output clean, because of that we return not the full body as you may expects, but only first 255 bytes of the response, that one can call a pragmatic approach. 1-----------------345-----this is 285 bytes binary.this is a beginning part of a long response body, we want to keep the log output clean, because of that we return not the full body as you may expects, but only first 255 bytes of the response, that one can call a pragmatic approach. 1-----------------345-----this is 285 bytes binary.">>)
     ).
 
 should_give_short_info_about_short_request_body(_) ->

@@ -35,9 +35,10 @@ list_body_last(Body, Len) ->
     binary:bin_to_list(Body, {byte_size(Body), -min(Len, byte_size(Body))}).
 
 gun_request_body_printable(Body) ->
-    First = list_body_first(Body, 200),
-    Last = list_body_last(Body, 50),
-    [if 
-        length(First)+length(Last) > 0 -> First ++ " ... " ++ Last;
+    Cut = 400,
+    Last = list_body_last(Body, Cut),
+    Extra = if 
+        byte_size(Body) > Cut -> " ... ";
         true -> ""
-    end].
+    end,
+    [Extra ++ Last].
