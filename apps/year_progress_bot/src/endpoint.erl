@@ -42,7 +42,10 @@ cowboy_reply_fun(Status, Headers, Body, Req0, Opts) ->
     {ok, Req, Opts}.
 
 reply_on_start(ChatId, Req0, Opts) ->
-    Msg = "Bot will send the year progress bar daily.\nLike the following.\n" ++ formatter:year_progress_bar(date:now()),
+    Top = <<"Bot will send the year progress bar daily.\nLike the following.\n"/utf8>>,
+    Bar = formatter:year_progress_bar(date:now()),
+    Closing = <<"\n\nYou can add this bot to a channel and it will post progress bar there."/utf8>>,
+    Msg = <<Top/binary, Bar/binary, Closing/binary>>,
     cowboy_reply_fun(200, #{
 		<<"content-type">> => <<"application/json">>
 	}, jiffy:encode({[
@@ -63,7 +66,7 @@ reply_on_help(ChatId, Req0, Opts) ->
     cowboy_reply_fun(200, #{
 		<<"content-type">> => <<"application/json">>
 	}, jiffy:encode({[
-        {<<"text">>, "Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message"},
+        {<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>},
         {<<"chat_id">>, ChatId}
     ]}), Req0, Opts).
 

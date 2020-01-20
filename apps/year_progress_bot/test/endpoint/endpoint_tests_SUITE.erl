@@ -60,7 +60,7 @@ should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
-    ?assert_json_value(<<"text">>, binary_to_list(<<"Bot will send the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0">>), Res),
+    ?assert_json_value(<<"text">>, <<"Bot will send the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0\n\nYou can add this bot to a channel and it will post progress bar there."/utf8>>, Res),
     ok.
 
 should_reply_with_chat_id_received_on_start(Config) ->
@@ -79,7 +79,7 @@ should_reply_with_progress_bar_on_progress(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
-    ?assert_json_value(<<"text">>, binary_to_list(<<"▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0">>), Res).
+    ?assert_json_value(<<"text">>, <<"▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0"/utf8>>, Res).
 
 should_reply_with_supported_commands_on_help(Config) ->
     Res = ?perform_post(
@@ -89,7 +89,7 @@ should_reply_with_supported_commands_on_help(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
-    ?assert_json_value(<<"text">>, "Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message", Res).
+    ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
 
 should_reply_with_501_not_implemented_on_unknown_command(Config) ->
     Res = ?perform_post(
