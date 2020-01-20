@@ -44,8 +44,9 @@ end_per_testcase(_TestCase, _Config) ->
 
 all() -> 
     [should_reply_with_warning_about_periodic_notification_on_start,
-     should_reply_with_chat_id_received_on_start,
-    %  should_support_start_at_bot_name_command,
+     should_reply_to_chat_id_received_on_start,
+     should_reply_with_warning_about_periodic_notification_on_start_in_channel,
+     should_reply_to_chat_id_received_on_start_in_channel,
      should_reply_with_progress_bar_on_progress,
      should_reply_with_supported_commands_on_help,
      should_reply_with_200_dont_know_emoji_on_unknown_command,
@@ -64,10 +65,9 @@ should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-    ?assert_json_value(<<"text">>, <<"Bot will send you the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0\n\nYou can add this bot to a channel as well, and it will post progress bar there."/utf8>>, Res),
-    ok.
+    ?assert_json_value(<<"text">>, <<"Bot will send you the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0\n\nYou can add this bot to a channel as well, and it will post progress bar there."/utf8>>, Res).
 
-should_reply_with_chat_id_received_on_start(Config) ->
+should_reply_to_chat_id_received_on_start(Config) ->
     Res = ?perform_post(
         ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
@@ -75,8 +75,24 @@ should_reply_with_chat_id_received_on_start(Config) ->
     ),
     ?assert_json_value(<<"chat_id">>, 1213141, Res).
 
-% should_support_start_at_bot_name_command(Config) ->
+should_reply_with_warning_about_periodic_notification_on_start_in_channel(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        channel_message(-1214111, <<"/start">>)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"Bot will send you the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0\n\nYou can add this bot to a channel as well, and it will post progress bar there."/utf8>>, Res).
 
+should_reply_to_chat_id_received_on_start_in_channel(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        channel_message(-1214111, <<"/start">>)
+    ),
+    ?assert_json_value(<<"chat_id">>, -1214111, Res).
 
 should_reply_with_progress_bar_on_progress(Config) ->
     Res = ?perform_post(
@@ -87,7 +103,7 @@ should_reply_with_progress_bar_on_progress(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-    ?assert_json_value(<<"text">>, <<"▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0"/utf8>>, Res).
+    ?assert_json_value(<<"text">>, <<"▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0"/utf8>>, Res).
 
 should_reply_with_supported_commands_on_help(Config) ->
     Res = ?perform_post(
@@ -183,5 +199,24 @@ audio_message(ChatId) ->
                 \"mime_type\": \"audio/ogg\",
                 \"file_size\": 23000
             }
+        }
+    }">>/binary>>.
+
+channel_message(ChatId, Command) ->
+    <<<<"{
+        \"channel_post\": {
+            \"message_id\":3,
+            \"chat\":{
+                \"id\":">>/binary, (list_to_binary(io_lib:format("~w", [ChatId])))/binary, <<",
+                \"title\":\"\ud83e\udd37\u200d\u2642\ufe0f\",
+                \"type\":\"channel\"
+            },
+            \"date\":1579557751,
+            \"text\":\"">>/binary, (Command)/binary ,<<"\",
+            \"entities\":[{
+                \"offset\":0,
+                \"length\":15,
+                \"type\":\"bot_command\"
+            }]
         }
     }">>/binary>>.
