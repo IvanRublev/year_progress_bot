@@ -11,7 +11,8 @@
     sumo_db_pgsql,
     shotgun,
     jiffy,
-    erlang_localtime
+    erlang_localtime,
+    mixer
    ]},
   {env, []},
   {modules, [notifyer]},

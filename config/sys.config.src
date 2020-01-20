@@ -22,7 +22,7 @@
       ]}
     ]},
     {stores, [
-      {pgsql_store, sumo_store_pgsql, [
+      {pgsql_store, custom_pgsql_store, [
         {storage_backend, our_backend_pgsql},
         {workers, 10}
       ]}

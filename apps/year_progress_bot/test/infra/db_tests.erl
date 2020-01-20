@@ -8,6 +8,7 @@ db_test_() ->
          meck:expect(sumo, create_schema, fun() -> ok end),
          meck:expect(sumo, find_by, fun(_, _, _, _) -> [] end),
          meck:expect(sumo, persist, fun(_) -> {ok, #{}} end),
+         meck:expect(sumo, call, fun(_, _, _) -> {ok, {docs, [#{}]}} end),
          meck:new(sumo_changeset),
          meck:expect(sumo_changeset, cast, fun(_, S, _, _) -> S end),
          meck:expect(sumo_changeset, validate_required, fun(S, _) -> S end)
@@ -53,9 +54,9 @@ should_update_chats_with_ids_and_date(_) ->
 should_add_chat_with_id_and_date(_) ->
     db:add_notified_chat(1234, {{2020, 01, 02}, {23, 59, 59}}),
 
-    ?_assert(meck:called(sumo, persist, [chats:new(1234, {{2020, 01, 02}, {23, 59, 59}})])).
+    ?_assert(meck:called(sumo, call, [chats, persist_new, [chats:new(1234, {{2020, 01, 02}, {23, 59, 59}})]])).
 
 should_ignore_error_on_adding_existing_chat_id(_) ->
-    meck:expect(sumo, persist, fun(_) -> {error, #{}} end),
+    meck:expect(sumo, call, fun(_, _, _) -> {error, already_exists} end),
 
     ?_assertMatch(ok, db:add_notified_chat(1234, {{2020, 01, 02}, {23, 59, 59}})).
