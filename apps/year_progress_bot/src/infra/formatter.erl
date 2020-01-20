@@ -13,14 +13,15 @@ year_progress_bar(Date) ->
     FillBar = round(PassedDays*BarLen/TotalDays),
     EmptyBar = BarLen-FillBar,
     {Y, _, _} = DT,
-    case DT of 
+    List = case DT of 
         {_, 1, 1} -> bar(BarLen, 0, 100, Y-1) ++ io_lib:format("~n~n", []) ++ bar(0, BarLen, 0, Y);
         _ -> bar(FillBar, EmptyBar, Percent, Y)
-    end.
+    end,
+    unicode:characters_to_binary(List).
 
 bar(FillBar, EmptyBar, Percent, Year) ->
     YearSp = lists:join(32, io_lib:format("~B", [Year])),
-    io_lib:format("~*c~*c ~B%~n", [FillBar, $▓, EmptyBar, $░, Percent]) ++ YearSp.
+    io_lib:format("~*tc~*tc ~B%~n", [FillBar, $▓, EmptyBar, $░, Percent]) ++ YearSp.
 
 gun_response_printable(Resp) ->
     [maps:get(status_code, Resp, undef),

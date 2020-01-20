@@ -5,7 +5,7 @@ send_test_() ->
     {foreach,
      fun() ->
          meck:new(formatter),
-         meck:expect(formatter, year_progress_bar, fun(_) -> "%" end),
+         meck:expect(formatter, year_progress_bar, fun(_) -> <<"%">> end),
          meck:new(jiffy),
          meck:expect(jiffy, encode, fun(_) -> <<"{json}">> end),
          meck:expect(jiffy, decode, fun(_, _) -> #{<<"ok">> => true} end),
@@ -41,7 +41,7 @@ should_get_progress_bar_from_date(_) ->
 should_make_json_payload_for_progress_bar_message(_) ->
     telegram:send_message(15, {{2020,10,11}, {11,50}}),
 
-    ?_assert(meck:called(jiffy, encode, [{[{chat_id, 15}, {text, "%"}]}])).
+    ?_assert(meck:called(jiffy, encode, [{[{chat_id, 15}, {text, <<"%">>}]}])).
 
 should_POST_message_payload_to_telegram_server(_) ->
     telegram:send_message(15, {{2020,10,11}, {11,50}}),
