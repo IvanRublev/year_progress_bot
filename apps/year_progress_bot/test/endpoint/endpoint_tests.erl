@@ -15,7 +15,7 @@ start_test_() ->
                 \"text\":\"/start\"
             }
         }">>,
-        meck:expect(cowboy_req, read_urlencoded_body, fun(_) -> {ok, [{Body, true}], {}} end),
+        meck:expect(cowboy_req, read_body, fun(_) -> {ok, Body, {}} end),
         meck:expect(cowboy_req, reply, fun(_, _, _, _) -> {} end),
         meck:new(date, [passthrough]),
         meck:expect(date, now, [], {{2020, 01, 02}, {12, 08, 22}}),

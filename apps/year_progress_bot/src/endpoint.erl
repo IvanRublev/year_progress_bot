@@ -2,10 +2,16 @@
 -export([init/2]).
 -compile([{parse_transform, lager_transform}]).
 
+read_body(Req0, Acc) ->
+    case cowboy_req:read_body(Req0) of
+        {ok, Data, Req} -> {ok, << Acc/binary, Data/binary >>, Req};
+        {more, Data, Req} -> read_body(Req, << Acc/binary, Data/binary >>)
+    end.
+
 init(Req0, Opts) ->
     lager:debug("Endpoint requested ->"),
-    case cowboy_req:read_urlencoded_body(Req0) of 
-        {ok, [{Body, true}], _} ->
+    case read_body(Req0, <<"">>) of 
+        {ok, Body, _} ->
             lager:debug("-> Body: ~s", formatter:gun_request_body_printable(Body)),
             BodyJson = jiffy:decode(Body, [return_maps]),
             case parse_update(BodyJson) of
