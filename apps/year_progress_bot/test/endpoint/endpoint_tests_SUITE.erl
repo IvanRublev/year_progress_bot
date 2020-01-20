@@ -48,7 +48,7 @@ all() ->
     %  should_support_start_at_bot_name_command,
      should_reply_with_progress_bar_on_progress,
      should_reply_with_supported_commands_on_help,
-     should_reply_with_501_not_implemented_on_unknown_command,
+     should_reply_with_200_dont_know_emoji_on_unknown_command,
      should_reply_with_400_bad_request_on_empty_body,
      should_reply_with_400_bad_request_on_malformed_json_body,
      should_reply_ok_on_health_path].
@@ -99,15 +99,16 @@ should_reply_with_supported_commands_on_help(Config) ->
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
     ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
 
-should_reply_with_501_not_implemented_on_unknown_command(Config) ->
+should_reply_with_200_dont_know_emoji_on_unknown_command(Config) ->
     Res = ?perform_post(
         ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         json_message(1111111, <<"/unknown">>)
     ),
-    ?assert_status(501, Res),
-    ?assert_header_value("content-type", "text/html", Res),
-    ?assert_body("Not implemented", Res).
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"🤷‍♂️"/utf8>>, Res).
 
 should_reply_with_400_bad_request_on_empty_body(Config) ->
     Res = ?perform_post(

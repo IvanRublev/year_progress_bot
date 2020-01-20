@@ -11,6 +11,8 @@ read_body(Req0, Acc) ->
 init(Req0, Opts) ->
     lager:debug("Endpoint requested ->"),
     case read_body(Req0, <<"">>) of 
+        {ok, <<"">>, _} ->
+            reply_bad_request_error(Req0, Opts);
         {ok, Body, _} ->
             lager:debug("-> Body: ~s", formatter:gun_request_body_printable(Body)),
             BodyJson = jiffy:decode(Body, [return_maps]),
@@ -22,7 +24,7 @@ init(Req0, Opts) ->
                             reply_on_start(ChatId, Req0, Opts);
                         <<"/progress">> -> reply_on_progress(ChatId, Req0, Opts);
                         <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
-                        _ -> reply_not_implemented_error(Req0, Opts)
+                        _ -> reply_dont_know(ChatId, Req0, Opts)
                     end;
                 _ ->
                     reply_bad_request_error(Req0, Opts)
@@ -79,8 +81,14 @@ reply_on_help(ChatId, Req0, Opts) ->
         {<<"chat_id">>, ChatId}
     ]}), Req0, Opts).
 
-reply_not_implemented_error(Req0, Opts) ->
-    cowboy_reply_fun(501, #{<<"content-type">> => <<"text/html">>}, "Not implemented", Req0, Opts).
+reply_dont_know(ChatId, Req0, Opts) ->
+    cowboy_reply_fun(200, #{
+		<<"content-type">> => <<"application/json">>
+	}, jiffy:encode({[
+        {<<"method">>, <<"sendMessage">>},
+        {<<"text">>, <<"🤷‍♂️"/utf8>>},
+        {<<"chat_id">>, ChatId}
+    ]}), Req0, Opts).
 
 reply_bad_request_error(Req0, Opts) ->
     cowboy_reply_fun(400, #{<<"content-type">> => <<"text/html">>}, "Bad request", Req0, Opts).
