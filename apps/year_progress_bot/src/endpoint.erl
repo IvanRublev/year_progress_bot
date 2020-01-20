@@ -26,6 +26,8 @@ init(Req0, Opts) ->
                         <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
                         _ -> reply_dont_know(ChatId, Req0, Opts)
                     end;
+                {ChatId} ->
+                    reply_dont_know(ChatId, Req0, Opts);
                 _ ->
                     reply_bad_request_error(Req0, Opts)
             end;
@@ -40,6 +42,10 @@ parse_update(Message) ->
             <<"text">> := Text
         }} -> 
             {ChatId, Text};
+        #{<<"message">> := #{
+            <<"chat">> := #{<<"id">> := ChatId}
+        }} -> 
+            {ChatId};
         _ -> 
             error
     end.

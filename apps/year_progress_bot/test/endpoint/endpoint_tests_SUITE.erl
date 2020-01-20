@@ -49,6 +49,7 @@ all() ->
      should_reply_with_progress_bar_on_progress,
      should_reply_with_supported_commands_on_help,
      should_reply_with_200_dont_know_emoji_on_unknown_command,
+     should_reply_with_200_dont_know_emoji_on_unhandled_message,
      should_reply_with_400_bad_request_on_empty_body,
      should_reply_with_400_bad_request_on_malformed_json_body,
      should_reply_ok_on_health_path].
@@ -110,6 +111,17 @@ should_reply_with_200_dont_know_emoji_on_unknown_command(Config) ->
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
     ?assert_json_value(<<"text">>, <<"🤷‍♂️"/utf8>>, Res).
 
+should_reply_with_200_dont_know_emoji_on_unhandled_message(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        audio_message(1111111)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"🤷‍♂️"/utf8>>, Res).
+
 should_reply_with_400_bad_request_on_empty_body(Config) ->
     Res = ?perform_post(
         ?config(bot_endpoint_url, Config),
@@ -146,5 +158,30 @@ json_message(ChatId, Text) ->
                 \"username\":\"Test\"
             },
             \"text\":\"">>/binary, Text/binary, <<"\"
+        }
+    }">>/binary>>.
+
+audio_message(ChatId) ->
+    <<<<"{
+        \"message\":{
+            \"chat\":{
+                \"last_name\":\"Test Lastname\",
+                \"id\":">>/binary, (list_to_binary(io_lib:format("~w", [ChatId])))/binary, <<",
+                \"first_name\":\"Test\",
+                \"username\":\"Test\"
+            },
+            \"message_id\":1365,
+            \"from\":{
+                \"last_name\":\"Test Lastname\",
+                \"id\":1111111,
+                \"first_name\":\"Test Firstname\",
+                \"username\":\"Testusername\"
+            },
+            \"voice\": {
+                \"file_id\": \"AwADBAADbXXXXXXXXXXXGBdhD2l6_XX\",
+                \"duration\": 5,
+                \"mime_type\": \"audio/ogg\",
+                \"file_size\": 23000
+            }
         }
     }">>/binary>>.
