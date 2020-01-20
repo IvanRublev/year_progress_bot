@@ -17,7 +17,7 @@ send_message_fun(ChatId, ProgressDate) ->
     Msg = formatter:year_progress_bar(ProgressDate),
     Payload = jiffy:encode({[{chat_id, ChatId}, {text, Msg}]}),
     
-    {ok, Response} = shotgun:post(Conn, Path, Headers, Payload),
+    {ok, Response} = shotgun:post(Conn, Path, Headers, Payload, #{}),
     
     ok = shotgun:close(Conn),
 

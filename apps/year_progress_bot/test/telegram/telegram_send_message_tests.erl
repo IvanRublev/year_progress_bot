@@ -11,7 +11,7 @@ send_test_() ->
          meck:expect(jiffy, decode, fun(_, _) -> #{<<"ok">> => true} end),
          meck:new(shotgun),
          meck:expect(shotgun, open, fun(_,_,_) -> {ok, 123} end),
-         meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 200, body => <<"">>}} end),
+         meck:expect(shotgun, post, fun(_,_,_,_,_) -> {ok, #{status_code => 200, body => <<"">>}} end),
          meck:expect(shotgun, close, fun(_) -> ok end),
          application:set_env([
             {year_progress_bot, [
@@ -47,22 +47,22 @@ should_POST_message_payload_to_telegram_server(_) ->
     telegram:send_message(15, {{2020,10,11}, {11,50}}),
 
     [?_assert(meck:called(shotgun, open, ["HOST", 443, https])),
-     ?_assert(meck:called(shotgun, post, [123, "/botTOKEN/sendMessage", #{<<"content-type">> => <<"application/json">>}, <<"{json}">>])),
+     ?_assert(meck:called(shotgun, post, [123, "/botTOKEN/sendMessage", #{<<"content-type">> => <<"application/json">>}, <<"{json}">>, #{}])),
      ?_assert(meck:called(shotgun, close, [123]))].
 
 should_return_ok_on_status_2xx(_) ->
-    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 210, body => <<"">>}} end),
+    meck:expect(shotgun, post, fun(_,_,_,_,_) -> {ok, #{status_code => 210, body => <<"">>}} end),
 
     ?_assertMatch(ok, telegram:send_message(15, {{2020,10,11}, {11,50}})).
 
 should_return_error_on_status_5xx(_) ->
-    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 504, body => <<"{some json}">>}} end),
+    meck:expect(shotgun, post, fun(_,_,_,_,_) -> {ok, #{status_code => 504, body => <<"{some json}">>}} end),
 
     Exp = {error, 504, <<"{some json}">>},
     ?_assertMatch(Exp, telegram:send_message(15, {{2020,10,11}, {11,50}})).
 
 sholud_return_error_from_backend_in_case_of_failure(_) ->
-    meck:expect(shotgun, post, fun(_,_,_,_) -> {ok, #{status_code => 202, body => <<"{\"ok\": false}">>}} end),
+    meck:expect(shotgun, post, fun(_,_,_,_,_) -> {ok, #{status_code => 202, body => <<"{\"ok\": false}">>}} end),
     meck:expect(jiffy, decode, fun(_, _) -> #{<<"ok">> => false} end),
 
     Exp = {error, internal, <<"{\"ok\": false}">>},
