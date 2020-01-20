@@ -11,13 +11,18 @@ year_bar_test_() ->
      fun(_) ->
         meck:unload(date)
      end,
-     [fun should_have_0_blocks_0_percent_bar_for_2_jan/1,
+     [fun should_add_spaces_after_bar_to_push_year_on_next_line_on_macos/1,
+      fun should_have_0_blocks_0_percent_bar_for_2_jan/1,
       fun should_have_0_blocks_1_percent_bar_for_5_jan/1,
       fun should_have_1_block_6_percent_bar_for_25_jan/1,
       fun should_have_15_block_96_percent_bar_for_20_dec/1,
       fun should_have_15_block_99_percent_bar_for_31_dec/1,
       fun should_have_year_number_in_message/1,
       fun should_have_full_bar_of_2020_and_zero_bar_of_2021_for_1_jan_2021/1]}.
+
+should_add_spaces_after_bar_to_push_year_on_next_line_on_macos(_) ->
+    P = formatter:year_progress_bar({{2020,1,2}, {0,0}}),
+    ?_assertEqual(<<"░░░░░░░░░░░░░░░ 0%      \n"/utf8>>, binary:part(P, 0, 55)).
 
 should_have_0_blocks_0_percent_bar_for_2_jan(_) ->
     P = formatter:year_progress_bar({{2020,1,2}, {0,0}}),
@@ -48,7 +53,7 @@ should_have_full_bar_of_2020_and_zero_bar_of_2021_for_1_jan_2021(_) ->
     meck:expect(date, end_of_year_date, fun() -> {2021, 12, 31} end),
 
     P = formatter:year_progress_bar({{2021,1,1}, {0,0}}),
-    E = <<"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%\n2 0 2 0\n\n░░░░░░░░░░░░░░░ 0%\n2 0 2 1"/utf8>>,
+    E = <<"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%    \n2 0 2 0\n\n░░░░░░░░░░░░░░░ 0%      \n2 0 2 1"/utf8>>,
     ?_assertEqual(E, P).
 
 request_response_test_() ->

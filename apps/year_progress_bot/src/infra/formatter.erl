@@ -21,7 +21,8 @@ year_progress_bar(Date) ->
 
 bar(FillBar, EmptyBar, Percent, Year) ->
     YearSp = lists:join(32, io_lib:format("~B", [Year])),
-    io_lib:format("~*tc~*tc ~B%~n", [FillBar, $▓, EmptyBar, $░, Percent]) ++ YearSp.
+    Bar = io_lib:format("~*tc~*tc ~B%", [FillBar, $▓, EmptyBar, $░, Percent]),
+    io_lib:format("~-24ts~n", [Bar]) ++ YearSp.
 
 gun_response_printable(Resp) ->
     [maps:get(status_code, Resp, undef),
