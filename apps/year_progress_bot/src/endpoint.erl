@@ -51,6 +51,10 @@ parse_update(Message) ->
             <<"text">> := Text
         }} -> 
             {ChatId, Text};
+        #{<<"channel_post">> := #{
+            <<"chat">> := #{<<"id">> := ChatId}
+        }} -> 
+            {ChatId};
         _ -> 
             error
     end.
