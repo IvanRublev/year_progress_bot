@@ -45,12 +45,14 @@ end_per_testcase(_TestCase, _Config) ->
 all() -> 
     [should_reply_with_warning_about_periodic_notification_on_start,
      should_reply_with_chat_id_received_on_start,
+    %  should_support_start_at_bot_name_command,
      should_reply_with_progress_bar_on_progress,
      should_reply_with_supported_commands_on_help,
      should_reply_with_501_not_implemented_on_unknown_command,
      should_reply_with_400_bad_request_on_empty_body,
      should_reply_with_400_bad_request_on_malformed_json_body,
      should_reply_ok_on_health_path].
+
 
 should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     Res = ?perform_post(
@@ -60,7 +62,8 @@ should_reply_with_warning_about_periodic_notification_on_start(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
-    ?assert_json_value(<<"text">>, <<"Bot will send the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0\n\nYou can add this bot to a channel and it will post progress bar there."/utf8>>, Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"Bot will send you the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0\n\nYou can add this bot to a channel as well, and it will post progress bar there."/utf8>>, Res),
     ok.
 
 should_reply_with_chat_id_received_on_start(Config) ->
@@ -71,6 +74,9 @@ should_reply_with_chat_id_received_on_start(Config) ->
     ),
     ?assert_json_value(<<"chat_id">>, 1213141, Res).
 
+% should_support_start_at_bot_name_command(Config) ->
+
+
 should_reply_with_progress_bar_on_progress(Config) ->
     Res = ?perform_post(
         ?config(bot_endpoint_url, Config),
@@ -79,6 +85,7 @@ should_reply_with_progress_bar_on_progress(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
     ?assert_json_value(<<"text">>, <<"▓▓░░░░░░░░░░░░░ 15%\n2 0 2 0"/utf8>>, Res).
 
 should_reply_with_supported_commands_on_help(Config) ->
@@ -89,6 +96,7 @@ should_reply_with_supported_commands_on_help(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
     ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
 
 should_reply_with_501_not_implemented_on_unknown_command(Config) ->
