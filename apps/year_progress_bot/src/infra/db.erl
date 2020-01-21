@@ -1,5 +1,6 @@
 -module(db).
 -export([create_schema/0, unnotified_chats/2, mark_chats_notified/2, add_notified_chat/2]).
+-compile([{parse_transform, lager_transform}]).
 
 create_schema() ->
     sumo:create_schema().
@@ -20,4 +21,5 @@ persist(Id, Date) ->
 add_notified_chat(Id, Date) ->
     Chat = chats:new(Id, Date),
     sumo:call(chats, persist_new, [Chat]),
+    lager:debug("New chat id ~p is stored in DB.", [Id]),
     ok.
