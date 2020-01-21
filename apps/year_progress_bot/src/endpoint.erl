@@ -16,27 +16,30 @@ init(Req0, Opts) ->
         {ok, Body, _} ->
             lager:debug("-> Body: ~s", formatter:gun_request_body_printable(Body)),
             BodyJson = jiffy:decode(Body, [return_maps]),
-            case parse_update(BodyJson) of
-                {Type, ChatId, Text} ->
-                    case Text of
-                        <<"/start">> ->
-                            db:add_notified_chat(ChatId, date:end_of_today()),
-                            reply_on_start(ChatId, Req0, Opts);
-                        <<"/progress">> -> reply_on_progress(ChatId, Req0, Opts);
-                        <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
-                        _ -> 
-                            if 
-                                Type == channel -> reply_ignore(Req0, Opts);
-                                true -> reply_dont_know(ChatId, Req0, Opts)
-                            end
-                    end;
-                {dm, ChatId} ->
-                    reply_dont_know(ChatId, Req0, Opts);
-                {channel, _ChatId} ->
-                    reply_ignore(Req0, Opts);
-                _ ->
-                    reply_bad_request_error(Req0, Opts)
+            reply_on(BodyJson, Req0, Opts);
+        _ ->
+            reply_bad_request_error(Req0, Opts)
+    end.
+
+reply_on(BodyJson, Req0, Opts) ->
+    case parse_update(BodyJson) of
+        {Type, ChatId, Text} ->
+            case Text of
+                <<"/start">> ->
+                    db:add_notified_chat(ChatId, date:end_of_today()),
+                    reply_on_start(ChatId, Req0, Opts);
+                <<"/progress">> -> reply_on_progress(ChatId, Req0, Opts);
+                <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
+                _ -> 
+                    if 
+                        Type == channel -> reply_ignore(Req0, Opts);
+                        true -> reply_dont_know(ChatId, Req0, Opts)
+                    end
             end;
+        {dm, ChatId} ->
+            reply_dont_know(ChatId, Req0, Opts);
+        {channel, _ChatId} ->
+            reply_ignore(Req0, Opts);
         _ ->
             reply_bad_request_error(Req0, Opts)
     end.
