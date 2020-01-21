@@ -5,7 +5,7 @@
 evaluate_send_progress(BatchSpec) ->
     {H, M} = date:time(),
     if 
-        (H >= 11) and (M >= 30) -> send_progress(BatchSpec, date:now(), #{});
+        ((H >= 11) and (M >= 30) or (H >= 12)) -> send_progress(BatchSpec, date:now(), #{});
         true -> ok
     end.
 

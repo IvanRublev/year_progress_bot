@@ -16,10 +16,19 @@ progress_send_time_test_() ->
         meck:unload(telegram)
      end,
      [fun should_send_progress_to_subscribed_chats_after_11_30_CET/1,
-      fun should_Not_send_progress_to_subscribed_chats_before_11_30_CET/1]}.
+      fun should_send_progress_to_subscribed_chats_at_12_10_CET/1,
+      fun should_Not_send_progress_to_subscribed_chats_before_11_30_CET/1,
+      fun should_Not_send_progress_to_subscribed_chats_after_midnight_CET/1]}.
 
 should_send_progress_to_subscribed_chats_after_11_30_CET(_) ->
     meck:expect(date, time, fun() -> {11, 30} end),
+
+    notifyer:evaluate_send_progress({1, 1}),
+
+    ?_assert(meck:called(telegram, send_message, '_')).
+
+should_send_progress_to_subscribed_chats_at_12_10_CET(_) ->
+    meck:expect(date, time, fun() -> {12, 10} end),
 
     notifyer:evaluate_send_progress({1, 1}),
 
@@ -31,6 +40,14 @@ should_Not_send_progress_to_subscribed_chats_before_11_30_CET(_) ->
     notifyer:evaluate_send_progress({1, 1}),
 
     ?_assertMatch(false, meck:called(telegram, send_message, '_')).
+
+should_Not_send_progress_to_subscribed_chats_after_midnight_CET(_) ->
+    meck:expect(date, time, fun() -> {0, 1} end),
+
+    notifyer:evaluate_send_progress({1, 1}),
+
+    ?_assertMatch(false, meck:called(telegram, send_message, '_')).
+
 
 %-------------------------
 send_in_batches_test_() ->
