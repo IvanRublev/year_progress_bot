@@ -53,7 +53,7 @@ all() ->
      should_reply_with_supported_commands_on_help,
      should_reply_with_supported_commands_on_help_in_channel,
      should_reply_with_200_dont_know_emoji_on_unknown_command,
-     should_reply_with_200_dont_know_emoji_on_unknown_command_in_channel,
+     should_reply_with_200_ignore_on_unknown_command_in_channel,
      should_reply_with_200_dont_know_emoji_on_unhandled_message,
      should_reply_with_200_ignore_on_unhandled_message_in_channel,
      should_reply_with_400_bad_request_on_empty_body,
@@ -165,7 +165,7 @@ should_reply_with_200_dont_know_emoji_on_unknown_command(Config) ->
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
     ?assert_json_value(<<"text">>, <<"🤷‍♂️"/utf8>>, Res).
 
-should_reply_with_200_dont_know_emoji_on_unknown_command_in_channel(Config) ->
+should_reply_with_200_ignore_on_unknown_command_in_channel(Config) ->
     Res = ?perform_post(
         ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
@@ -173,8 +173,7 @@ should_reply_with_200_dont_know_emoji_on_unknown_command_in_channel(Config) ->
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
-    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-    ?assert_json_value(<<"text">>, <<"🤷‍♂️"/utf8>>, Res).
+    ?assert_body("", Res).
 
 should_reply_with_200_dont_know_emoji_on_unhandled_message(Config) ->
     Res = ?perform_post(

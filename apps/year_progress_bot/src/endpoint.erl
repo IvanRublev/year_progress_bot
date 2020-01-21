@@ -17,14 +17,18 @@ init(Req0, Opts) ->
             lager:debug("-> Body: ~s", formatter:gun_request_body_printable(Body)),
             BodyJson = jiffy:decode(Body, [return_maps]),
             case parse_update(BodyJson) of
-                {_, ChatId, Text} ->
+                {Type, ChatId, Text} ->
                     case Text of
                         <<"/start">> ->
                             db:add_notified_chat(ChatId, date:end_of_today()),
                             reply_on_start(ChatId, Req0, Opts);
                         <<"/progress">> -> reply_on_progress(ChatId, Req0, Opts);
                         <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
-                        _ -> reply_dont_know(ChatId, Req0, Opts)
+                        _ -> 
+                            if 
+                                Type == channel -> reply_ignore(ChatId, Req0, Opts);
+                                true -> reply_dont_know(ChatId, Req0, Opts)
+                            end
                     end;
                 {dm, ChatId} ->
                     reply_dont_know(ChatId, Req0, Opts);
@@ -62,7 +66,7 @@ parse_update(Message) ->
     end.
 
 cowboy_reply_fun(Status, Headers, Body, Req0, Opts) ->
-    lager:debug("<- Endpoint reply with status: ~p body: ~s...", [Status, Body]),
+    lager:debug("<- Endpoint reply with status: ~p body: ~s", [Status, Body]),
     Req = cowboy_req:reply(Status, Headers, Body, Req0),
     {ok, Req, Opts}.
 
