@@ -48,21 +48,41 @@ parse_update(Message) ->
             <<"text">> := Text
         }} -> 
             {dm, ChatId, Text};
+
         #{<<"message">> := #{
             <<"chat">> := #{<<"id">> := ChatId}
+
         }} -> 
             {dm, ChatId};
+        
         #{<<"channel_post">> := #{
             <<"chat">> := #{<<"id">> := ChatId}, 
             <<"text">> := Text
         }} -> 
-            {channel, ChatId, Text};
+            parse_address_in_channel({ChatId, Text});
+
         #{<<"channel_post">> := #{
             <<"chat">> := #{<<"id">> := ChatId}
         }} -> 
             {channel, ChatId};
+
         _ -> 
             error
+    end.
+
+parse_address_in_channel({ChatId, Text}) ->
+    {ok, BotName} = application:get_env(year_progress_bot, tel_bot_name),
+    Address = <<"@", (list_to_binary(BotName))/binary>>,
+    TextSize = byte_size(Text),
+    AddressSize = byte_size(Address),
+    if 
+        TextSize-AddressSize < 0 -> {channel, ChatId, Text};
+        true ->
+            AddrMatch = binary:match(Text, [Address], [{scope, {TextSize, -AddressSize}}]),
+            case AddrMatch of
+                nomatch -> {channel, ChatId, Text};
+                _ -> {channel_dm, ChatId, binary:part(Text, 0, TextSize-AddressSize)}
+            end
     end.
 
 cowboy_reply_fun(Status, Headers, Body, Req0, Opts) ->

@@ -13,6 +13,7 @@ init_per_suite(Config) ->
         {year_progress_bot, [
             {tel_token, "tel_token"},
             {tel_host, "tel_host"},
+            {tel_bot_name, "yrpb_bot"},
             {host, "self.host"},
             {port, 8080},
             {webhook_path, "/some_uuid_path"}
@@ -47,7 +48,7 @@ all() ->
      should_reply_to_chat_id_received_on_start,
      should_reply_with_warning_about_periodic_notification_on_start_in_channel,
      should_reply_to_chat_id_received_on_start_in_channel,
-    %  should_reply_with_warning_about_periodic_notification_on_start_in_channel_addressed,
+     should_reply_with_warning_about_periodic_notification_on_start_in_channel_addressed,
      should_reply_with_progress_bar_on_progress,
      should_reply_with_progress_bar_on_progress_in_channel,
      should_reply_with_supported_commands_on_help,
@@ -99,16 +100,16 @@ should_reply_to_chat_id_received_on_start_in_channel(Config) ->
     ),
     ?assert_json_value(<<"chat_id">>, -1214111, Res).
 
-% should_reply_with_warning_about_periodic_notification_on_start_in_channel_addressed(Config) ->
-%     Res = ?perform_post(
-%         ?config(bot_endpoint_url, Config),
-%         [{<<"content-type">>, <<"application/json">>}],
-%         channel_message(-1214111, <<"/start@yrpb_bot">>)
-%     ),
-%     ?assert_status(200, Res),
-%     ?assert_header_value("content-type", "application/json", Res),
-%     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-%     ?assert_json_value(<<"text">>, <<"Bot will send you the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0\n\nYou can add this bot to a channel as well, and it will post progress bar there."/utf8>>, Res).
+should_reply_with_warning_about_periodic_notification_on_start_in_channel_addressed(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        channel_message(-1214111, <<"/start@yrpb_bot">>)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"Bot will send you the year progress bar daily.\nLike the following.\n▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0\n\nYou can add this bot to a channel as well, and it will post progress bar there."/utf8>>, Res).
 
 should_reply_with_progress_bar_on_progress(Config) ->
     Res = ?perform_post(
