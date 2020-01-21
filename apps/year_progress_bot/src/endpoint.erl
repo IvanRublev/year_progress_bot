@@ -17,7 +17,7 @@ init(Req0, Opts) ->
             lager:debug("-> Body: ~s", formatter:gun_request_body_printable(Body)),
             BodyJson = jiffy:decode(Body, [return_maps]),
             case parse_update(BodyJson) of
-                {ChatId, Text} ->
+                {_, ChatId, Text} ->
                     case Text of
                         <<"/start">> ->
                             db:add_notified_chat(ChatId, date:end_of_today()),
@@ -26,8 +26,10 @@ init(Req0, Opts) ->
                         <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
                         _ -> reply_dont_know(ChatId, Req0, Opts)
                     end;
-                {ChatId} ->
+                {dm, ChatId} ->
                     reply_dont_know(ChatId, Req0, Opts);
+                {channel, ChatId} ->
+                    reply_ignore(ChatId, Req0, Opts);
                 _ ->
                     reply_bad_request_error(Req0, Opts)
             end;
@@ -41,20 +43,20 @@ parse_update(Message) ->
             <<"chat">> := #{<<"id">> := ChatId}, 
             <<"text">> := Text
         }} -> 
-            {ChatId, Text};
+            {dm, ChatId, Text};
         #{<<"message">> := #{
             <<"chat">> := #{<<"id">> := ChatId}
         }} -> 
-            {ChatId};
+            {dm, ChatId};
         #{<<"channel_post">> := #{
             <<"chat">> := #{<<"id">> := ChatId}, 
             <<"text">> := Text
         }} -> 
-            {ChatId, Text};
+            {channel, ChatId, Text};
         #{<<"channel_post">> := #{
             <<"chat">> := #{<<"id">> := ChatId}
         }} -> 
-            {ChatId};
+            {channel, ChatId};
         _ -> 
             error
     end.
@@ -107,3 +109,8 @@ reply_dont_know(ChatId, Req0, Opts) ->
 
 reply_bad_request_error(Req0, Opts) ->
     cowboy_reply_fun(400, #{<<"content-type">> => <<"text/html">>}, "Bad request", Req0, Opts).
+
+reply_ignore(ChatId, Req0, Opts) ->
+    cowboy_reply_fun(200, #{
+		<<"content-type">> => <<"application/json">>
+	}, <<"">>, Req0, Opts).
