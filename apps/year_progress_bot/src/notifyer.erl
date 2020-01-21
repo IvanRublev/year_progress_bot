@@ -5,7 +5,7 @@
 evaluate_send_progress(BatchSpec) ->
     {H, M} = date:time(),
     if 
-        (H >= 11) and (M >= 30) -> send_progress(BatchSpec, date:now(), #{});
+        ((H >= 11) and (M >= 30) or (H >= 12)) -> send_progress(BatchSpec, date:now(), #{});
         true -> ok
     end.
 
@@ -23,6 +23,7 @@ send_progress({BatchSize, BatchTime} = BatchSpec, CurrentDate, Tries) ->
 
 send_message(Id, ProgressDate, Pause) ->
     R = telegram:send_message(Id, ProgressDate),
+    lager:debug("Send pb message to chat_id: ~p, pause: ~p, result: ~p", [Id, Pause, R]),
     util:pause(Pause),
     R.
 

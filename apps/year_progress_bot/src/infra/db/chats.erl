@@ -15,6 +15,6 @@ sumo_sleep(Chat) ->
 
 sumo_schema() ->
   sumo:new_schema(chats, [
-    sumo:new_field(id, integer, [not_null, auto_increment, id]),
+    sumo:new_field(id, string, [{length, 17}, not_null, id]),
     sumo:new_field(notified_at, datetime, [not_null])
   ]).

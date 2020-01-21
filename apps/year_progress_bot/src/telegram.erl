@@ -3,7 +3,7 @@
 -compile([{parse_transform, lager_transform}]).
 
 send_message(ChatId, ProgressDate) ->
-    case application:get_env(year_progress_bot, telegram_integrate) of
+    case application:get_env(year_progress_bot, tel_integrate) of
         {ok, true} -> send_message_fun(ChatId, ProgressDate);
         _ -> ok
     end.
@@ -17,7 +17,7 @@ send_message_fun(ChatId, ProgressDate) ->
     Msg = formatter:year_progress_bar(ProgressDate),
     Payload = jiffy:encode({[{chat_id, ChatId}, {text, Msg}]}),
     
-    {ok, Response} = shotgun:post(Conn, Path, Headers, Payload),
+    {ok, Response} = shotgun:post(Conn, Path, Headers, Payload, #{}),
     
     ok = shotgun:close(Conn),
 
@@ -33,7 +33,7 @@ send_message_fun(ChatId, ProgressDate) ->
     end.
 
 register_webhook() ->
-    case application:get_env(year_progress_bot, telegram_integrate) of
+    case application:get_env(year_progress_bot, tel_integrate) of
         {ok, true} -> register_webhook_fun();
         _ -> ok
     end.
@@ -47,9 +47,12 @@ register_webhook_fun() ->
     {ok, Token} = application:get_env(year_progress_bot, tel_token),
     HookUrl = "https://" ++ SelfHost ++ HookPath,
     Path = "/bot" ++ Token ++ "/setWebhook?" ++
-        "url=" ++ http_uri:encode(HookUrl) ++ 
-        "&allowed_updates=" ++ http_uri:encode("[\"message\",\"channel_post\"]"),
+        "url=" ++ url_encode(HookUrl) ++ 
+        "&allowed_updates=" ++ url_encode("[\"message\",\"channel_post\"]"),
     {ok, Response} = shotgun:get(Conn, Path),
-    lager:info("Registered Webhook with response ~p~n", [Response]),
+    lager:info("Registered Webhook with status: ~p and body: ~s...", formatter:gun_response_printable(Response)),
     
     ok = shotgun:close(Conn).
+
+url_encode(Str) ->
+    uri_string:compose_query([{Str, true}]).

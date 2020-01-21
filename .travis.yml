@@ -1,0 +1,6 @@
+install:
+  - rebar3 get-deps
+script:
+  - rebar3 as prod do compile,eunit,ct
+language: erlang
+otp_release: 22.2.1
