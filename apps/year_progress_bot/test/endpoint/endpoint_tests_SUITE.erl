@@ -51,10 +51,13 @@ all() ->
      should_reply_with_warning_about_periodic_notification_on_start_in_channel_addressed,
      should_reply_with_progress_bar_on_progress,
      should_reply_with_progress_bar_on_progress_in_channel,
+     should_reply_with_progress_bar_on_progress_in_channel_addressed,
      should_reply_with_supported_commands_on_help,
      should_reply_with_supported_commands_on_help_in_channel,
+     should_reply_with_supported_commands_on_help_in_channel_addressed,
      should_reply_with_200_dont_know_emoji_on_unknown_command,
      should_reply_with_200_ignore_on_unknown_command_in_channel,
+     should_reply_with_200_dont_know_emoji_on_unknown_command_in_channel_addressed,
      should_reply_with_200_dont_know_emoji_on_unhandled_message,
      should_reply_with_200_ignore_on_unhandled_message_in_channel,
      should_reply_with_400_bad_request_on_empty_body,
@@ -133,6 +136,17 @@ should_reply_with_progress_bar_on_progress_in_channel(Config) ->
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
     ?assert_json_value(<<"text">>, <<"▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0"/utf8>>, Res).
 
+should_reply_with_progress_bar_on_progress_in_channel_addressed(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        channel_message(-1111111, <<"/progress@yrpb_bot">>)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"▓▓░░░░░░░░░░░░░ 15%     \n2 0 2 0"/utf8>>, Res).
+
 should_reply_with_supported_commands_on_help(Config) ->
     Res = ?perform_post(
         ?config(bot_endpoint_url, Config),
@@ -149,6 +163,17 @@ should_reply_with_supported_commands_on_help_in_channel(Config) ->
         ?config(bot_endpoint_url, Config),
         [{<<"content-type">>, <<"application/json">>}],
         channel_message(-1111111, <<"/help">>)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
+
+should_reply_with_supported_commands_on_help_in_channel_addressed(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        channel_message(-1111111, <<"/help@yrpb_bot">>)
     ),
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
@@ -175,6 +200,17 @@ should_reply_with_200_ignore_on_unknown_command_in_channel(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_body("", Res).
+
+should_reply_with_200_dont_know_emoji_on_unknown_command_in_channel_addressed(Config) ->
+    Res = ?perform_post(
+        ?config(bot_endpoint_url, Config),
+        [{<<"content-type">>, <<"application/json">>}],
+        channel_message(-1111111, <<"/unknown@yrpb_bot">>)
+    ),
+    ?assert_status(200, Res),
+    ?assert_header_value("content-type", "application/json", Res),
+    ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
+    ?assert_json_value(<<"text">>, <<"🤷‍♂️"/utf8>>, Res).
 
 should_reply_with_200_dont_know_emoji_on_unhandled_message(Config) ->
     Res = ?perform_post(

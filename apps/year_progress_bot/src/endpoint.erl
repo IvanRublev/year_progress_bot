@@ -26,14 +26,14 @@ init(Req0, Opts) ->
                         <<"/help">> -> reply_on_help(ChatId, Req0, Opts);
                         _ -> 
                             if 
-                                Type == channel -> reply_ignore(ChatId, Req0, Opts);
+                                Type == channel -> reply_ignore(Req0, Opts);
                                 true -> reply_dont_know(ChatId, Req0, Opts)
                             end
                     end;
                 {dm, ChatId} ->
                     reply_dont_know(ChatId, Req0, Opts);
-                {channel, ChatId} ->
-                    reply_ignore(ChatId, Req0, Opts);
+                {channel, _ChatId} ->
+                    reply_ignore(Req0, Opts);
                 _ ->
                     reply_bad_request_error(Req0, Opts)
             end;
@@ -134,7 +134,7 @@ reply_dont_know(ChatId, Req0, Opts) ->
 reply_bad_request_error(Req0, Opts) ->
     cowboy_reply_fun(400, #{<<"content-type">> => <<"text/html">>}, "Bad request", Req0, Opts).
 
-reply_ignore(ChatId, Req0, Opts) ->
+reply_ignore(Req0, Opts) ->
     cowboy_reply_fun(200, #{
 		<<"content-type">> => <<"application/json">>
 	}, <<"">>, Req0, Opts).
