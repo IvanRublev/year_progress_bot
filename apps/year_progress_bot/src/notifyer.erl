@@ -23,7 +23,7 @@ send_progress({BatchSize, BatchTime} = BatchSpec, CurrentDate, Tries) ->
 
 send_message(Id, ProgressDate, Pause) ->
     R = telegram:send_message(Id, ProgressDate),
-    lager:debug("Send pb message to chat_id: ~p, result: ~p", [Id, R]),
+    lager:debug("Send pb message to chat_id: ~p, pause: ~p, result: ~p", [Id, Pause, R]),
     util:pause(Pause),
     R.
 
