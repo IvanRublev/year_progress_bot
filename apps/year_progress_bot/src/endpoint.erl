@@ -114,11 +114,12 @@ reply_on_progress(ChatId, Req0, Opts) ->
     ]}), Req0, Opts).
 
 reply_on_help(ChatId, Req0, Opts) ->
+    {ok, BotName} = application:get_env(year_progress_bot, tel_bot_name),
     cowboy_reply_fun(200, #{
 		<<"content-type">> => <<"application/json">>
 	}, jiffy:encode({[
         {<<"method">>, <<"sendMessage">>},
-        {<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>},
+        {<<"text">>, <<(list_to_binary(BotName))/binary, " sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>},
         {<<"chat_id">>, ChatId}
     ]}), Req0, Opts).
 

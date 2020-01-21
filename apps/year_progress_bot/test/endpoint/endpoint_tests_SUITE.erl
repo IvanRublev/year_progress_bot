@@ -27,7 +27,8 @@ init_per_suite(Config) ->
 
     lists:merge([
         {bot_endpoint_url, "http://localhost:8080/some_uuid_path"},
-        {health_endpoint_url, "http://localhost:8080/health"}
+        {health_endpoint_url, "http://localhost:8080/health"},
+        {bot_help_reply, <<"yrpb_bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>}
     ], Config).
 
 end_per_suite(_Config) ->
@@ -156,7 +157,7 @@ should_reply_with_supported_commands_on_help(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-    ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
+    ?assert_json_value(<<"text">>, ?config(bot_help_reply, Config), Res).
 
 should_reply_with_supported_commands_on_help_in_channel(Config) ->
     Res = ?perform_post(
@@ -167,7 +168,7 @@ should_reply_with_supported_commands_on_help_in_channel(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-    ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
+    ?assert_json_value(<<"text">>, ?config(bot_help_reply, Config), Res).
 
 should_reply_with_supported_commands_on_help_in_channel_addressed(Config) ->
     Res = ?perform_post(
@@ -178,7 +179,7 @@ should_reply_with_supported_commands_on_help_in_channel_addressed(Config) ->
     ?assert_status(200, Res),
     ?assert_header_value("content-type", "application/json", Res),
     ?assert_json_value(<<"method">>, <<"sendMessage">>, Res),
-    ?assert_json_value(<<"text">>, <<"Bot sends the year progress bar. The following commands are supported:\n/start - start the bot\n/progress - show today's progress of the year\n/help - this message">>, Res).
+    ?assert_json_value(<<"text">>, ?config(bot_help_reply, Config), Res).
 
 should_reply_with_200_dont_know_emoji_on_unknown_command(Config) ->
     Res = ?perform_post(
