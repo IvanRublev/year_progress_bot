@@ -34,7 +34,7 @@
     {events, []}
   ]},
   {lager, [
-    {handlers, [{lager_console_backend, [{level,debug}]}]},
+    {handlers, [{lager_console_backend, [{level,info}]}]},
     {error_logger_redirect, false}
   ]}
 ].
